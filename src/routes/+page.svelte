@@ -1,2 +1,8 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script>
+    import PaperCanvas from "$lib/components/PaperCanvas.svelte";
+    import {drawParticles} from "$lib/utils/genuary.2024.01.js";
+</script>
+
+<main>
+    <PaperCanvas sketch={drawParticles} />
+</main>
