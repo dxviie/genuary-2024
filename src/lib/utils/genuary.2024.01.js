@@ -4,15 +4,19 @@ let gridElementSize = 0;
 let gridOffset = 0;
 
 let emitterPath = null;
+let emitterPathLength = 0;
 let emitter = null;
 
 const totalTime = 5;
+
+let particlesEmitted = 0;
 export function drawParticles(paper, event) {
     gridElementSize = paper.view.bounds.width / gridSize;
     gridOffset = gridElementSize / 2;
 
     if (!emitterPath) {
         emitterPath = createEmitterPath(paper);
+        emitterPathLength = emitterPath.length;
         emitter = new paper.Path.Circle({
             center: emitterPath.getPointAt(0),
             radius: 10,
@@ -21,9 +25,21 @@ export function drawParticles(paper, event) {
     }
 
     const ratio = Math.min(1, (event.time % totalTime) / totalTime);
-    const length = emitterPath.length;
-    let emitterPosition = emitterPath.getPointAt(length * ratio);
-    emitter.position = emitterPosition;
+    emitter.position = emitterPath.getPointAt(emitterPathLength * ratio);
+
+    let expectedPariclesEmitted = Math.ceil((emitterPathLength * ratio + gridOffset) / gridElementSize);
+    if (expectedPariclesEmitted > particlesEmitted) {
+        const particle = new paper.Path.Circle({
+            center: emitter.position,
+            radius: 5,
+            fillColor: 'black'
+        });
+        particlesEmitted++;
+        console.log(particlesEmitted)
+    }
+    if (particlesEmitted === particleCount) {
+        particlesEmitted = 0;
+    }
 }
 
 function createEmitterPath(paper) {
