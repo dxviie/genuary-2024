@@ -1,4 +1,4 @@
-const particleCount = 4*4*4;
+const particleCount = 4;
 const gridSize = Math.sqrt(particleCount);
 let gridElementSize = 0;
 let gridOffset = 0;
@@ -7,9 +7,10 @@ let emitterPath = null;
 let emitterPathLength = 0;
 let emitter = null;
 
-const totalTime = 5;
+const totalTime = 1;
 
 let particlesEmitted = 0;
+let particles = [];
 export function drawParticles(paper, event) {
     gridElementSize = paper.view.bounds.width / gridSize;
     gridOffset = gridElementSize / 2;
@@ -26,20 +27,31 @@ export function drawParticles(paper, event) {
 
     const ratio = Math.min(1, (event.time % totalTime) / totalTime);
     emitter.position = emitterPath.getPointAt(emitterPathLength * ratio);
-
-    let expectedPariclesEmitted = Math.ceil((emitterPathLength * ratio + gridOffset) / gridElementSize);
-    if (expectedPariclesEmitted > particlesEmitted) {
-        const particle = new paper.Path.Circle({
-            center: emitter.position,
-            radius: 5,
-            fillColor: 'black'
-        });
-        particlesEmitted++;
-        console.log(particlesEmitted)
-    }
-    if (particlesEmitted === particleCount) {
+    if (ratio < 0.1 && particlesEmitted > particleCount * 0.8) {
         particlesEmitted = 0;
     }
+
+    const pathTravelled = emitterPathLength * ratio;
+    let expectedParticlesEmitted = Math.floor((pathTravelled) / gridElementSize) + 1;
+
+    if (expectedParticlesEmitted > particlesEmitted ||
+        (ratio >= 0.975 && particlesEmitted < particleCount)) {
+        let offset = 0;
+        do {
+            let center = new paper.Point(emitter.position);
+            if (offset > 0) {
+                center = emitterPath.getPointAt(emitterPathLength * ratio - (offset * gridElementSize));
+            }
+            particles.push(createParticle(paper, center, event.time, offset > 0));
+            particlesEmitted++;
+            offset++;
+        }
+        while(particlesEmitted < expectedParticlesEmitted);
+    }
+
+    particles.forEach((particle) => {
+        particle.path.opacity = 1 - (event.time - particle.startTime) / particle.lifeTime;
+    });
 }
 
 function createEmitterPath(paper) {
@@ -79,5 +91,25 @@ function createEmitterPath(paper) {
             path.add(prevPoint);
         }
     }
+    if (path.length < 2) {
+        // handling 1 particle edge case. 1 point doesn't define a path.
+        path.add(prevPoint);
+    }
     return path;
+}
+
+function createParticle(paper, center, time, isExtra) {
+    const particle = new paper.Path.Circle({
+        center: center,
+        radius: gridElementSize / 1.8,
+        fillColor: isExtra ? 'rgba(255, 0, 0, 1)' : 'rgba(0, 0, 0, 1)'
+    });
+
+    const timeVariation = totalTime * 0.5;
+    const timeVariationHalf = timeVariation / 2;
+    return {
+        path: particle,
+        startTime: time,
+        lifeTime: totalTime + (Math.random() * timeVariation - timeVariationHalf)
+    }
 }
