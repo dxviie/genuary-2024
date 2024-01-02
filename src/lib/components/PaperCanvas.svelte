@@ -5,13 +5,19 @@
     export let sketch;
     export let reset = null;
     export let debug = false;
+    export let animate = true;
     let canvas;
 
     onMount(() => {
         paper.setup(canvas);
         if (sketch && typeof sketch === 'function') {
-            paper.view.onFrame = (event) => {
-                sketch(paper, event, debug);
+            if (animate) {
+                paper.view.onFrame = (event) => {
+                    sketch(paper, event, debug);
+                }
+            }
+            else {
+                sketch(paper, null, debug);
             }
         } else {
             console.error('Draw function not provided or not a function');

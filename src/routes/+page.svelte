@@ -7,8 +7,8 @@
     let debug = false;
     let sketches = [
         {name: "00. Select prompt.", sketch: () => {}, reset: () => {}},
-        {name: "01. Particles. Lots of them.", sketch: drawParticles, reset: clearParticles},
-        {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors}
+        {name: "01. Particles. Lots of them.", sketch: drawParticles, reset: clearParticles, animation: true},
+        {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors, animation: false}
     ];
 
     let selectedSketch = sketches[0];
@@ -42,7 +42,12 @@
         </select>
     </div>
 
-    <PaperCanvas key={key} sketch={selectedSketch.sketch} reset={selectedSketch.reset} debug={debug}/>
+    <PaperCanvas key={key}
+                 sketch={selectedSketch.sketch}
+                 reset={selectedSketch.reset}
+                 animate={selectedSketch.animation}
+                 debug={debug}
+                 />
 
     <div class="footer">
         <div class="debug-container">
