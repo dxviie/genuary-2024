@@ -3,12 +3,12 @@
     import paper from 'paper';
 
     export let sketch;
+    export let reset = null;
     export let debug = false;
     let canvas;
 
     onMount(() => {
         paper.setup(canvas);
-
         if (sketch && typeof sketch === 'function') {
             paper.view.onFrame = (event) => {
                 sketch(paper, event, debug);
@@ -16,9 +16,11 @@
         } else {
             console.error('Draw function not provided or not a function');
         }
-
-
     });
+
+    $: if (reset) {
+        reset();
+    }
 </script>
 
 <div class="canvas-container">
@@ -36,7 +38,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh; /* Adjust height as needed */
+        /*height: 100vh; !* Adjust height as needed *!*/
     }
 
 </style>

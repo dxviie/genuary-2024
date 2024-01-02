@@ -17,14 +17,42 @@ let particles = [];
 let oldParticles = [];
 
 let text = null;
+
+export function clearParticles() {
+    PARTICLE_COUNT = 1;
+    GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
+    iterationEndTime = pastIterationTime + iterationTime;
+    iterationTime = 1;
+    pastIterationTime = 0;
+    if (text) {
+        text.remove();
+        text = null;
+    }
+    particles.forEach((particle) => {
+        particle.path.remove();
+    });
+    oldParticles.forEach((particle) => {
+        particle.path.remove();
+    });
+    particles = [];
+    oldParticles = [];
+    if (emitterPath) {
+        emitterPath.remove();
+        emitterPath = null;
+    }
+    if (emitter) {
+        emitter.remove();
+    }
+}
+
 export function drawParticles(paper, event, debug) {
 
     if (!text) {
-        text = new paper.PointText(new paper.Point(paper.view.bounds.width * 0.2, 50));
+        text = new paper.PointText(new paper.Point(paper.view.bounds.width * 0.25, paper.view.bounds.width * 0.05));
         text.justification = 'center';
         text.fillColor = 'black';
         text.fontFamily = 'Courier New';
-        text.fontSize = 16;
+        text.fontSize = paper.view.bounds.width * 0.025;
         text.content = `${PARTICLE_COUNT} particle in ${iterationTime} second`;
     }
 
@@ -40,7 +68,6 @@ export function drawParticles(paper, event, debug) {
         // and increase the particle count
         PARTICLE_COUNT *= 4;
         if (PARTICLE_COUNT > MAX_PARTICLE_COUNT) {
-            // RESET!!
             PARTICLE_COUNT = 1;
             pastIterationTime = event.time;
             iterationTime = 1;
@@ -55,10 +82,13 @@ export function drawParticles(paper, event, debug) {
 
         text.content = `${PARTICLE_COUNT} particles in ${Math.ceil(iterationTime)} seconds`;
 
-        emitterPath.remove();
-        emitter.remove();
-        emitterPath = null;
-        console.log('particles', PARTICLE_COUNT, 'time', iterationTime, 'past', pastIterationTime, 'end', iterationEndTime)
+        if (emitterPath) {
+            emitterPath.remove();
+            emitterPath = null;
+        }
+        if (emitter) {
+            emitter.remove();
+        }
     }
 
     // calculate the element size
@@ -78,7 +108,6 @@ export function drawParticles(paper, event, debug) {
 
     // move the emitter along the path
     const ratio = Math.min(1, (event.time - pastIterationTime) / iterationTime);
-    console.log('ratio', ratio);
     emitter.position = emitterPath.getPointAt(emitterPathLength * ratio);
 
     const pathTravelled = emitterPathLength * ratio;
