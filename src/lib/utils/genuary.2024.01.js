@@ -1,7 +1,7 @@
-let particleCount = 4 * 4 * 4 * 4;
-let gridSize = Math.sqrt(particleCount);
-let gridElementSize = 0;
-let gridOffset = 0;
+let PARTICLE_COUNT = 4 * 4 * 4 * 4;
+let GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
+let GRID_ELEMENT_SIZE = 0;
+let GRID_OFFSET = 0;
 
 let emitterPath = null;
 let emitterPathLength = 0;
@@ -33,8 +33,8 @@ export function drawParticles(paper, event) {
         // emitterPath = null;
     }
 
-    gridElementSize = paper.view.bounds.width / gridSize;
-    gridOffset = gridElementSize / 2;
+    GRID_ELEMENT_SIZE = paper.view.bounds.width / GRID_SIZE;
+    GRID_OFFSET = GRID_ELEMENT_SIZE / 2;
 
     // create the emitter & its path if it doesn't exist
     if (!emitterPath) {
@@ -53,15 +53,15 @@ export function drawParticles(paper, event) {
 
 
     const pathTravelled = emitterPathLength * ratio;
-    let expectedParticlesEmitted = Math.floor((pathTravelled) / gridElementSize) + 1;
+    let expectedParticlesEmitted = Math.floor((pathTravelled) / GRID_ELEMENT_SIZE) + 1;
 
     if (expectedParticlesEmitted > particles.length ||
-        (ratio >= 0.975 && particles.length < particleCount)) {
+        (ratio >= 0.975 && particles.length < PARTICLE_COUNT)) {
         let offset = 0;
         do {
             let center = new paper.Point(emitter.position);
             if (offset > 0) {
-                center = emitterPath.getPointAt(emitterPathLength * ratio - (offset * gridElementSize));
+                center = emitterPath.getPointAt(emitterPathLength * ratio - (offset * GRID_ELEMENT_SIZE));
             }
             particles.push(createParticle(paper, center, event.time, offset > 0));
             console.log('particles', particles.length)
@@ -86,23 +86,23 @@ function createEmitterPath(paper) {
         strokeCap: 'round'
     });
 
-    let prevPoint = new paper.Point(gridOffset, gridOffset);
+    let prevPoint = new paper.Point(GRID_OFFSET, GRID_OFFSET);
     path.add(prevPoint);
-    for (let i = 0; i < particleCount - 1; i++) {
-        const row = Math.floor(i / gridSize);
-        const atEdge = (i + 1) % gridSize === 0;
+    for (let i = 0; i < PARTICLE_COUNT - 1; i++) {
+        const row = Math.floor(i / GRID_SIZE);
+        const atEdge = (i + 1) % GRID_SIZE === 0;
         if (atEdge) {
             // go down
             prevPoint = new paper.Point(
                 prevPoint.x,
-                prevPoint.y + gridElementSize
+                prevPoint.y + GRID_ELEMENT_SIZE
             );
             path.add(prevPoint);
         }
         else if (row % 2 === 0) {
             // even rows go right
             prevPoint = new paper.Point(
-                prevPoint.x + gridElementSize,
+                prevPoint.x + GRID_ELEMENT_SIZE,
                 prevPoint.y
             );
             path.add(prevPoint);
@@ -110,7 +110,7 @@ function createEmitterPath(paper) {
         else {
             // odd rows go left
             prevPoint = new paper.Point(
-                prevPoint.x - gridElementSize,
+                prevPoint.x - GRID_ELEMENT_SIZE,
                 prevPoint.y
             );
             path.add(prevPoint);
@@ -126,7 +126,7 @@ function createEmitterPath(paper) {
 function createParticle(paper, center, time, isExtra) {
     const particle = new paper.Path.Circle({
         center: center,
-        radius: gridElementSize / 1.8,
+        radius: GRID_ELEMENT_SIZE / 1.8,
         fillColor: isExtra ? 'rgba(255, 0, 0, 1)' : 'rgba(0, 0, 0, 1)'
     });
 
