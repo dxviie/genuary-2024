@@ -4,5 +4,5 @@
 </script>
 
 <main>
-    <PaperCanvas sketch={drawParticles} />
+    <PaperCanvas sketch={drawParticles} debug={false}/>
 </main>

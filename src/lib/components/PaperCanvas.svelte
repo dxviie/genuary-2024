@@ -3,6 +3,7 @@
     import paper from 'paper';
 
     export let sketch;
+    export let debug = false;
     let canvas;
 
     onMount(() => {
@@ -10,7 +11,7 @@
 
         if (sketch && typeof sketch === 'function') {
             paper.view.onFrame = (event) => {
-                sketch(paper, event);
+                sketch(paper, event, debug);
             }
         } else {
             console.error('Draw function not provided or not a function');

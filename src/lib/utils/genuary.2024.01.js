@@ -7,12 +7,12 @@ let emitterPath = null;
 let emitterPathLength = 0;
 let emitter = null;
 
-let totalTime = 2;
+let totalTime = 10;
 let iteration = 0;
 
 let particles = [];
 let oldParticles = [];
-export function drawParticles(paper, event) {
+export function drawParticles(paper, event, debug) {
     // every iteration we remove the old particles
     const currentIteration = Math.floor(event.time / totalTime);
     if (currentIteration > iteration) {
@@ -38,12 +38,12 @@ export function drawParticles(paper, event) {
 
     // create the emitter & its path if it doesn't exist
     if (!emitterPath) {
-        emitterPath = createEmitterPath(paper);
+        emitterPath = createEmitterPath(paper, debug);
         emitterPathLength = emitterPath.length;
         emitter = new paper.Path.Circle({
             center: emitterPath.getPointAt(0),
             radius: 10,
-            fillColor: 'red'
+            fillColor: debug ? 'red' : null
         });
     }
 
@@ -63,8 +63,7 @@ export function drawParticles(paper, event) {
             if (offset > 0) {
                 center = emitterPath.getPointAt(emitterPathLength * ratio - (offset * GRID_ELEMENT_SIZE));
             }
-            particles.push(createParticle(paper, center, event.time, offset > 0));
-            console.log('particles', particles.length)
+            particles.push(createParticle(paper, center, event.time));
             offset++;
         }
         while(particles.length < expectedParticlesEmitted);
@@ -79,9 +78,9 @@ export function drawParticles(paper, event) {
 }
 
 
-function createEmitterPath(paper) {
+function createEmitterPath(paper, debug) {
     const path = new paper.Path({
-        strokeColor: 'rgba(255, 0, 0, 0.33)',
+        strokeColor: debug ? 'rgba(255, 0, 0, 0.33)' : 'rgba(0, 0, 0, 0)',
         strokeWidth: 1,
         strokeCap: 'round'
     });
@@ -123,15 +122,22 @@ function createEmitterPath(paper) {
     return path;
 }
 
-function createParticle(paper, center, time, isExtra) {
-    const particle = new paper.Path.Circle({
+const timeVariation = totalTime * 0.5;
+const timeVariationHalf = timeVariation / 2;
+function createParticle(paper, center, time) {
+    const choice = Math.round(Math.random() * 3) + 3;
+    let particle = new paper.Path.RegularPolygon({
         center: center,
-        radius: GRID_ELEMENT_SIZE / 1.8,
-        fillColor: isExtra ? 'rgba(255, 0, 0, 1)' : 'rgba(0, 0, 0, 1)'
+        sides: choice,
+        radius: GRID_ELEMENT_SIZE / 1.75 * Math.random(),
+        fillColor: Math.random() > 0.5 ? 'rgb(0, 0, 0)' : null,
+        strokeColor: 'rgb(0, 0, 0)',
+        strokeWidth: Math.random() * 10 + 5,
+        opacity: 1
     });
 
-    const timeVariation = totalTime * 0.5;
-    const timeVariationHalf = timeVariation / 2;
+    particle.rotate(Math.random() * 360);
+
     return {
         path: particle,
         startTime: time,
