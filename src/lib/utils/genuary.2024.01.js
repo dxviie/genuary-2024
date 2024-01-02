@@ -1,4 +1,4 @@
-let PARTICLE_COUNT = 4 * 4 * 4 * 4;
+let PARTICLE_COUNT = 1;
 let GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
 let GRID_ELEMENT_SIZE = 0;
 let GRID_OFFSET = 0;
@@ -7,7 +7,7 @@ let emitterPath = null;
 let emitterPathLength = 0;
 let emitter = null;
 
-let totalTime = 10;
+let totalTime = 1;
 let iteration = 0;
 
 let particles = [];
@@ -33,8 +33,9 @@ export function drawParticles(paper, event, debug) {
         // emitterPath = null;
     }
 
-    GRID_ELEMENT_SIZE = paper.view.bounds.width / GRID_SIZE;
-    GRID_OFFSET = GRID_ELEMENT_SIZE / 2;
+    // calculate the element size
+    GRID_ELEMENT_SIZE = paper.view.bounds.width * 0.8 / GRID_SIZE;
+    GRID_OFFSET = GRID_ELEMENT_SIZE / 2 + (paper.view.bounds.width * 0.1);
 
     // create the emitter & its path if it doesn't exist
     if (!emitterPath) {
@@ -47,16 +48,15 @@ export function drawParticles(paper, event, debug) {
         });
     }
 
+    // move the emitter along the path
     const ratio = Math.min(1, (event.time % totalTime) / totalTime);
     emitter.position = emitterPath.getPointAt(emitterPathLength * ratio);
-
-
 
     const pathTravelled = emitterPathLength * ratio;
     let expectedParticlesEmitted = Math.floor((pathTravelled) / GRID_ELEMENT_SIZE) + 1;
 
     if (expectedParticlesEmitted > particles.length ||
-        (ratio >= 0.975 && particles.length < PARTICLE_COUNT)) {
+        (ratio >= 0.98 && particles.length < PARTICLE_COUNT)) {
         let offset = 0;
         do {
             let center = new paper.Point(emitter.position);
@@ -122,22 +122,55 @@ function createEmitterPath(paper, debug) {
     return path;
 }
 
-const timeVariation = totalTime * 0.5;
+const timeVariation = totalTime;
 const timeVariationHalf = timeVariation / 2;
 function createParticle(paper, center, time) {
-    const choice = Math.round(Math.random() * 3) + 3;
-    let particle = new paper.Path.RegularPolygon({
-        center: center,
-        sides: choice,
-        radius: GRID_ELEMENT_SIZE / 1.75 * Math.random(),
-        fillColor: Math.random() > 0.5 ? 'rgb(0, 0, 0)' : null,
-        strokeColor: 'rgb(0, 0, 0)',
-        strokeWidth: Math.random() * 10 + 5,
-        opacity: 1
-    });
-
-    particle.rotate(Math.random() * 360);
-
+    const choice = Math.round(Math.random() * 2);
+    let particle = null;
+    let fill = Math.random() > 0.5 ? 'rgb(0, 0, 0)' : null;
+    let strokeWidth = GRID_ELEMENT_SIZE * 0.1;
+    switch (choice) {
+        case 0:
+            particle = new paper.Path.Circle({
+                center: center,
+                radius: GRID_ELEMENT_SIZE / 2,
+                fillColor: fill,
+                strokeColor: 'rgb(0, 0, 0)',
+                strokeWidth: strokeWidth,
+                opacity: 1
+            });
+            break;
+        case 1:
+            particle = new paper.Path.Rectangle({
+                center: center,
+                size: [GRID_ELEMENT_SIZE, GRID_ELEMENT_SIZE],
+                fillColor: fill,
+                strokeColor: 'rgb(0, 0, 0)',
+                strokeWidth: strokeWidth,
+                opacity: 1
+            });
+            break;
+        case 2:
+            particle = new paper.Path.RegularPolygon({
+                center: center,
+                sides: 3,
+                radius: GRID_ELEMENT_SIZE / 1.75,
+                fillColor: fill,
+                strokeColor: 'rgb(0, 0, 0)',
+                strokeWidth: strokeWidth,
+                opacity: 1
+            });
+            if (Math.random() > 0.5) {
+                particle.rotate(180);
+                particle.translate({x: 0, y: strokeWidth});
+            }
+            else {
+                particle.translate({x: 0, y: strokeWidth * 2});
+            }
+            break;
+        default:
+           console.error('no particle type chosen');
+    }
     return {
         path: particle,
         startTime: time,
