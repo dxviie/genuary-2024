@@ -1,13 +1,14 @@
 <script>
     import PaperCanvas from "$lib/components/PaperCanvas.svelte";
     import {clearParticles, drawParticles} from "$lib/utils/genuary.2024.01.js";
-    import {drawGenerativeColors} from "$lib/utils/genuary.2024.02.js";
+    import {drawGenerativeColors, resetColors} from "$lib/utils/genuary.2024.02.js";
 
     let key = 0;
     let debug = false;
     let sketches = [
+        {name: "00. Select prompt.", sketch: () => {}, reset: () => {}},
         {name: "01. Particles. Lots of them.", sketch: drawParticles, reset: clearParticles},
-        {name: "02. No palettes.", sketch: drawGenerativeColors}
+        {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors}
     ];
 
     let selectedSketch = sketches[0];

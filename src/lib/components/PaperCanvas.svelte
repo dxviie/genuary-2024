@@ -18,6 +18,10 @@
         }
     });
 
+    $: if (sketch) {
+        paper.project.activeLayer.removeChildren();
+    }
+
     $: if (reset) {
         reset();
     }
@@ -29,7 +33,7 @@
 
 <style>
     canvas {
-        border: 1px solid #ccc;
+        border: 1px dashed black;
         width: 80vmin;
         aspect-ratio: 1;
     }
