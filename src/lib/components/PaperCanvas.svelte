@@ -19,7 +19,9 @@
     });
 
     $: if (sketch) {
-        paper.project.activeLayer.removeChildren();
+        if (paper && paper.project && paper.project.activeLayer) {
+            paper.project.activeLayer.removeChildren();
+        }
     }
 
     $: if (reset) {
