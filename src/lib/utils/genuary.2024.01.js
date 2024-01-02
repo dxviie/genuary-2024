@@ -1,4 +1,5 @@
 let PARTICLE_COUNT = 1;
+const MAX_PARTICLE_COUNT = 5000;
 let GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
 let GRID_ELEMENT_SIZE = 0;
 let GRID_OFFSET = 0;
@@ -7,16 +8,17 @@ let emitterPath = null;
 let emitterPathLength = 0;
 let emitter = null;
 
-let totalTime = 1;
-let iteration = 0;
+let iterationTime = 1;
+let pastIterationTime = 0;
+let iterationEndTime = iterationTime;
+// let iteration = 0;
 
 let particles = [];
 let oldParticles = [];
 export function drawParticles(paper, event, debug) {
     // every iteration we remove the old particles
-    const currentIteration = Math.floor(event.time / totalTime);
-    if (currentIteration > iteration) {
-        iteration = currentIteration;
+    if (event.time > iterationEndTime) {
+        // iteration = currentIteration;
         oldParticles.forEach((particle) => {
             particle.path.remove();
         });
@@ -24,13 +26,25 @@ export function drawParticles(paper, event, debug) {
         particles = [];
 
         // and increase the particle count
-        // particleCount *= 4;
-        // totalTime *= 2;
-        // iterationEndTime = event.time + totalTime;
-        // gridSize = Math.sqrt(particleCount);
-        // emitterPath.remove();
-        // emitter.remove();
-        // emitterPath = null;
+        PARTICLE_COUNT *= 4;
+        if (PARTICLE_COUNT > MAX_PARTICLE_COUNT) {
+            // RESET!!
+            PARTICLE_COUNT = 1;
+            pastIterationTime = event.time;
+            iterationTime = 1;
+            iterationEndTime = pastIterationTime + iterationTime;
+        }
+        else {
+            pastIterationTime = event.time;
+            iterationTime *= 1.5;
+            iterationEndTime = pastIterationTime + iterationTime;
+        }
+        GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
+
+        emitterPath.remove();
+        emitter.remove();
+        emitterPath = null;
+        console.log('particles', PARTICLE_COUNT, 'time', iterationTime, 'past', pastIterationTime, 'end', iterationEndTime)
     }
 
     // calculate the element size
@@ -49,7 +63,8 @@ export function drawParticles(paper, event, debug) {
     }
 
     // move the emitter along the path
-    const ratio = Math.min(1, (event.time % totalTime) / totalTime);
+    const ratio = Math.min(1, (event.time - pastIterationTime) / iterationTime);
+    console.log('ratio', ratio);
     emitter.position = emitterPath.getPointAt(emitterPathLength * ratio);
 
     const pathTravelled = emitterPathLength * ratio;
@@ -122,7 +137,7 @@ function createEmitterPath(paper, debug) {
     return path;
 }
 
-const timeVariation = totalTime;
+const timeVariation = iterationTime;
 const timeVariationHalf = timeVariation / 2;
 function createParticle(paper, center, time) {
     const choice = Math.round(Math.random() * 2);
@@ -174,6 +189,6 @@ function createParticle(paper, center, time) {
     return {
         path: particle,
         startTime: time,
-        lifeTime: totalTime + (Math.random() * timeVariation - timeVariationHalf)
+        lifeTime: iterationTime + (Math.random() * timeVariation - timeVariationHalf)
     }
 }
