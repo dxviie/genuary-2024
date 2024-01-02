@@ -1,5 +1,5 @@
-const particleCount = 4;
-const gridSize = Math.sqrt(particleCount);
+let particleCount = 4 * 4 * 4 * 4;
+let gridSize = Math.sqrt(particleCount);
 let gridElementSize = 0;
 let gridOffset = 0;
 
@@ -7,14 +7,36 @@ let emitterPath = null;
 let emitterPathLength = 0;
 let emitter = null;
 
-const totalTime = 1;
+let totalTime = 2;
+let iteration = 0;
 
-let particlesEmitted = 0;
 let particles = [];
+let oldParticles = [];
 export function drawParticles(paper, event) {
+    // every iteration we remove the old particles
+    const currentIteration = Math.floor(event.time / totalTime);
+    if (currentIteration > iteration) {
+        iteration = currentIteration;
+        oldParticles.forEach((particle) => {
+            particle.path.remove();
+        });
+        oldParticles = particles;
+        particles = [];
+
+        // and increase the particle count
+        // particleCount *= 4;
+        // totalTime *= 2;
+        // iterationEndTime = event.time + totalTime;
+        // gridSize = Math.sqrt(particleCount);
+        // emitterPath.remove();
+        // emitter.remove();
+        // emitterPath = null;
+    }
+
     gridElementSize = paper.view.bounds.width / gridSize;
     gridOffset = gridElementSize / 2;
 
+    // create the emitter & its path if it doesn't exist
     if (!emitterPath) {
         emitterPath = createEmitterPath(paper);
         emitterPathLength = emitterPath.length;
@@ -27,15 +49,14 @@ export function drawParticles(paper, event) {
 
     const ratio = Math.min(1, (event.time % totalTime) / totalTime);
     emitter.position = emitterPath.getPointAt(emitterPathLength * ratio);
-    if (ratio < 0.1 && particlesEmitted > particleCount * 0.8) {
-        particlesEmitted = 0;
-    }
+
+
 
     const pathTravelled = emitterPathLength * ratio;
     let expectedParticlesEmitted = Math.floor((pathTravelled) / gridElementSize) + 1;
 
-    if (expectedParticlesEmitted > particlesEmitted ||
-        (ratio >= 0.975 && particlesEmitted < particleCount)) {
+    if (expectedParticlesEmitted > particles.length ||
+        (ratio >= 0.975 && particles.length < particleCount)) {
         let offset = 0;
         do {
             let center = new paper.Point(emitter.position);
@@ -43,16 +64,20 @@ export function drawParticles(paper, event) {
                 center = emitterPath.getPointAt(emitterPathLength * ratio - (offset * gridElementSize));
             }
             particles.push(createParticle(paper, center, event.time, offset > 0));
-            particlesEmitted++;
+            console.log('particles', particles.length)
             offset++;
         }
-        while(particlesEmitted < expectedParticlesEmitted);
+        while(particles.length < expectedParticlesEmitted);
     }
 
     particles.forEach((particle) => {
         particle.path.opacity = 1 - (event.time - particle.startTime) / particle.lifeTime;
     });
+    oldParticles.forEach((particle) => {
+        particle.path.opacity = 1 - (event.time - particle.startTime) / particle.lifeTime;
+    });
 }
+
 
 function createEmitterPath(paper) {
     const path = new paper.Path({
