@@ -4,6 +4,7 @@
     import {drawGenerativeColors} from "$lib/utils/genuary.2024.02.js";
 
     let key = 0;
+    let debug = false;
     let sketches = [
         {name: "01. Particles. Lots of them.", sketch: drawParticles, reset: clearParticles},
         {name: "02. No palettes.", sketch: drawGenerativeColors}
@@ -15,6 +16,14 @@
         selectedSketch = sketches[event.target.value];
         key++;
     }
+
+    function handleDebug() {
+        if (selectedSketch.reset) {
+            selectedSketch.reset();
+        }
+        key++;
+    }
+
 </script>
 
 <main>
@@ -32,7 +41,14 @@
         </select>
     </div>
 
-    <PaperCanvas key={key} sketch={selectedSketch.sketch} reset={selectedSketch.reset} debug={false}/>
+    <PaperCanvas key={key} sketch={selectedSketch.sketch} reset={selectedSketch.reset} debug={debug}/>
+
+    <div class="footer">
+        <div class="debug-container">
+            <label for="debug">draw debug lines</label>
+            <input type="checkbox" id="debug" name="debug" on:change={handleDebug} bind:checked={debug}/>
+        </div>
+    </div>
 </main>
 
 <style>
@@ -46,13 +62,11 @@
 
     h1 {
         font-size: 2rem;
-        font-family: "Courier New", Courier, monospace;
         margin-bottom: 1rem;
     }
 
     h2 {
         font-size: 1rem;
-        font-family: "Courier New", Courier, monospace;
         margin-top: -.5rem;
         margin-bottom: 1rem;
     }
@@ -72,17 +86,27 @@
         margin-top: 1rem;
         margin-bottom: 1rem;
         font-size: 1rem;
-        font-family: "Courier New", Courier, monospace;
     }
 
     select {
         width: 100%;
         background-color: rgba(255, 255, 255, 1);
-        border: 1px solid rgba(0, 0, 0, 1);
+        font-family: "Courier New", Courier, monospace;
         padding: 0.8rem;
         font-size: 1rem;
-        font-family: "Courier New", Courier, monospace;
         border-radius: .5rem;
+        border-color: rgba(0, 0, 0, 1);
+        border-width: 1px;
         border-style: dashed;
+    }
+
+    .footer {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        font-size: 1rem;
     }
 </style>
