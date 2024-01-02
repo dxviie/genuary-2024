@@ -15,7 +15,19 @@ let iterationEndTime = iterationTime;
 
 let particles = [];
 let oldParticles = [];
+
+let text = null;
 export function drawParticles(paper, event, debug) {
+
+    if (!text) {
+        text = new paper.PointText(new paper.Point(paper.view.bounds.width * 0.2, 50));
+        text.justification = 'center';
+        text.fillColor = 'black';
+        text.fontFamily = 'Courier New';
+        text.fontSize = 16;
+        text.content = `${PARTICLE_COUNT} particle in ${iterationTime} second`;
+    }
+
     // every iteration we remove the old particles
     if (event.time > iterationEndTime) {
         // iteration = currentIteration;
@@ -40,6 +52,8 @@ export function drawParticles(paper, event, debug) {
             iterationEndTime = pastIterationTime + iterationTime;
         }
         GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
+
+        text.content = `${PARTICLE_COUNT} particles in ${Math.ceil(iterationTime)} seconds`;
 
         emitterPath.remove();
         emitter.remove();
