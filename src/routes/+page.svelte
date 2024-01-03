@@ -52,7 +52,7 @@
     <h2>entries by <a href="https://d17e.dev" target="_self">d17e.dev</a></h2>
     <div class="header">
 
-        <select on:change={handleSelectSketch} id="sketch-selection" bind:value={selectedSketchIndex} aria-label="select prompt from list">
+        <select on:change={handleSelectSketch} id="sketch-selection" aria-label="select prompt from list">
             {#each sketches as sketch, index}
                 <option value={index}>
                     {sketch.name}
