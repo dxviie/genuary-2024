@@ -107,7 +107,7 @@ export function drawParticles(paper, event, debug) {
     // create the particles if they don't exist
     if (particles.length === 0) {
         // TODO optimization: generate all particles at the start (invisible)
-        console.log('creating particles', PARTICLE_COUNT);
+        // console.log('creating particles', PARTICLE_COUNT);
     }
 
     // move the emitter along the path
