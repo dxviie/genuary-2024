@@ -9,7 +9,7 @@ let emitterPathLength = 0;
 let emitter = null;
 
 let iterationTime = 5;
-let iterationBufferTime = 1;
+let iterationBufferTime = 2.5;
 let pastIterationTime = 0;
 let iterationEndTime = iterationTime;
 
@@ -53,7 +53,7 @@ export function drawParticles(paper, event, debug) {
         text.fillColor = 'black';
         text.fontFamily = 'Courier New';
         text.fontSize = paper.view.bounds.width * 0.02;
-        text.content = `${PARTICLE_COUNT} particle, ~${iterationTime} second`;
+        text.content = '';
     }
 
     // every iteration we remove the old particles
@@ -80,8 +80,6 @@ export function drawParticles(paper, event, debug) {
             iterationEndTime = pastIterationTime + iterationTime + iterationBufferTime;
         }
         GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
-
-        text.content = `${PARTICLE_COUNT} particles, ~${Math.ceil(iterationTime)} seconds`;
 
         if (emitterPath) {
             emitterPath.remove();
@@ -132,14 +130,31 @@ export function drawParticles(paper, event, debug) {
         }
     }
 
+    let visibleParticleCount = 0;
     particles.forEach((particle) => {
         if (!particle.active) { return; }
         particle.path.opacity = 1 - (event.time - particle.startTime) / particle.lifeTime;
+        if (particle.path.opacity <= 0) {
+            particle.active = false;
+        }
+        else {
+            visibleParticleCount++;
+        }
     });
     oldParticles.forEach((particle) => {
         if (!particle.active) { return; }
         particle.path.opacity = 1 - (event.time - particle.startTime) / particle.lifeTime;
+        if (particle.path.opacity <= 0) {
+            particle.active = false;
+        }
+        else {
+            visibleParticleCount++;
+        }
     });
+
+    if (text) {
+        text.content = `particles: ${visibleParticleCount}`;
+    }
 }
 
 
