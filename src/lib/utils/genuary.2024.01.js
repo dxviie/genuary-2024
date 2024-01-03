@@ -1,6 +1,6 @@
-let PARTICLE_COUNT = 1;
+let PARTICLE_COUNT = 0;
 const MAX_PARTICLE_COUNT = 5000;
-let GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
+let GRID_SIZE = 0;
 let GRID_ELEMENT_SIZE = 0;
 let GRID_OFFSET = 0;
 
@@ -8,19 +8,21 @@ let emitterPath = null;
 let emitterPathLength = 0;
 let emitter = null;
 
-let iterationTime = 1;
+let iterationTime = 5;
+let iterationBufferTime = 1;
 let pastIterationTime = 0;
 let iterationEndTime = iterationTime;
 
 let particles = [];
 let oldParticles = [];
+let activeParticleCount = 0;
 
 let text = null;
 
 export function clearParticles() {
     PARTICLE_COUNT = 1;
     GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
-    iterationEndTime = pastIterationTime + iterationTime;
+    iterationEndTime = pastIterationTime + iterationTime + iterationBufferTime;
     iterationTime = 1;
     pastIterationTime = 0;
     if (text) {
@@ -61,6 +63,7 @@ export function drawParticles(paper, event, debug) {
             particle.path.remove();
         });
         oldParticles = particles;
+        activeParticleCount = 0;
         particles = [];
 
         // and increase the particle count
@@ -69,12 +72,12 @@ export function drawParticles(paper, event, debug) {
             PARTICLE_COUNT = 1;
             pastIterationTime = event.time;
             iterationTime = 1;
-            iterationEndTime = pastIterationTime + iterationTime;
+            iterationEndTime = pastIterationTime + iterationTime + iterationBufferTime;
         }
         else {
             pastIterationTime = event.time;
-            iterationTime *= 1.5;
-            iterationEndTime = pastIterationTime + iterationTime;
+            // iterationTime *= 1.2;
+            iterationEndTime = pastIterationTime + iterationTime + iterationBufferTime;
         }
         GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
 
@@ -106,8 +109,10 @@ export function drawParticles(paper, event, debug) {
 
     // create the particles if they don't exist
     if (particles.length === 0) {
-        // TODO optimization: generate all particles at the start (invisible)
-        // console.log('creating particles', PARTICLE_COUNT);
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const center = emitterPath.getPointAt(Math.min(emitterPath.length, i * GRID_ELEMENT_SIZE));
+            particles.push(createParticle(paper, center, event.time));
+        }
     }
 
     // move the emitter along the path
@@ -115,26 +120,24 @@ export function drawParticles(paper, event, debug) {
     emitter.position = emitterPath.getPointAt(emitterPathLength * ratio);
 
     const pathTravelled = emitterPathLength * ratio;
-    let expectedParticlesEmitted = Math.floor((pathTravelled) / GRID_ELEMENT_SIZE) + 1;
+    let expectedParticlesActive = Math.floor((pathTravelled) / GRID_ELEMENT_SIZE) + 1;
 
-    if (expectedParticlesEmitted > particles.length ||
-        (ratio >= 0.98 && particles.length < PARTICLE_COUNT)) {
-        let offset = 0;
-        do {
-            let center = new paper.Point(emitter.position);
-            if (offset > 0) {
-                center = emitterPath.getPointAt(emitterPathLength * ratio - (offset * GRID_ELEMENT_SIZE));
-            }
-            particles.push(createParticle(paper, center, event.time));
-            offset++;
+    if (expectedParticlesActive > activeParticleCount ||
+        (ratio >= 0.98 && activeParticleCount < PARTICLE_COUNT))  {
+        for (let i = activeParticleCount; i < expectedParticlesActive; i++) {
+            particles[i].active = true;
+            particles[i].path.opacity = 1;
+            particles[i].startTime = event.time;
+            activeParticleCount++;
         }
-        while(particles.length < expectedParticlesEmitted);
     }
 
     particles.forEach((particle) => {
+        if (!particle.active) { return; }
         particle.path.opacity = 1 - (event.time - particle.startTime) / particle.lifeTime;
     });
     oldParticles.forEach((particle) => {
+        if (!particle.active) { return; }
         particle.path.opacity = 1 - (event.time - particle.startTime) / particle.lifeTime;
     });
 }
@@ -190,7 +193,7 @@ function createParticle(paper, center, time) {
     const choice = Math.round(Math.random() * 2);
     let particle = null;
     let fill = Math.random() > 0.5 ? 'rgb(0, 0, 0)' : null;
-    let strokeWidth = GRID_ELEMENT_SIZE * 0.1;
+    let strokeWidth = GRID_ELEMENT_SIZE * 0.15;
     switch (choice) {
         case 0:
             particle = new paper.Path.Circle({
@@ -199,7 +202,7 @@ function createParticle(paper, center, time) {
                 fillColor: fill,
                 strokeColor: 'rgb(0, 0, 0)',
                 strokeWidth: strokeWidth,
-                opacity: 1
+                opacity: 0
             });
             break;
         case 1:
@@ -209,7 +212,7 @@ function createParticle(paper, center, time) {
                 fillColor: fill,
                 strokeColor: 'rgb(0, 0, 0)',
                 strokeWidth: strokeWidth,
-                opacity: 1
+                opacity: 0
             });
             break;
         case 2:
@@ -220,20 +223,21 @@ function createParticle(paper, center, time) {
                 fillColor: fill,
                 strokeColor: 'rgb(0, 0, 0)',
                 strokeWidth: strokeWidth,
-                opacity: 1
+                opacity: 0
             });
             if (Math.random() > 0.5) {
                 particle.rotate(180);
-                particle.translate({x: 0, y: strokeWidth});
+                particle.translate({x: 0, y: strokeWidth * 0.45});
             }
             else {
-                particle.translate({x: 0, y: strokeWidth * 2});
+                particle.translate({x: 0, y: strokeWidth * 1.45});
             }
             break;
         default:
            console.error('no particle type chosen');
     }
     return {
+        active: false,
         path: particle,
         startTime: time,
         lifeTime: iterationTime + (Math.random() * timeVariation - timeVariationHalf)
