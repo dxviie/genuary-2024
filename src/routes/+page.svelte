@@ -2,19 +2,21 @@
     import PaperCanvas from "$lib/components/PaperCanvas.svelte";
     import {clearParticles, drawParticles} from "$lib/utils/genuary.2024.01.js";
     import {drawGenerativeColors, resetColors} from "$lib/utils/genuary.2024.02.js";
+    import {onMount} from "svelte";
 
     let key = 0;
+    let ping = 0;
     let debug = false;
     let sketches = [
         {name: "00. No sketch selected.", sketch: () => {}, reset: () => {}},
         {name: "01. Particles. Lots of them.", sketch: drawParticles, reset: clearParticles, animation: true},
         {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors, animation: false}
     ];
-
-    let selectedSketch = sketches[0];
+    let selectedSketchIndex = 0;
+    $: selectedSketch = sketches[selectedSketchIndex];
 
     function handleSelectSketch(event) {
-        selectedSketch = sketches[event.target.value];
+        selectedSketchIndex = event.target.value;
         key++;
     }
 
@@ -28,10 +30,18 @@
     function handleDice() {
         if (selectedSketch.reset) {
             selectedSketch.reset();
+            ping++;
         }
         key++;
     }
 
+    onMount(() => {
+        const params = new URLSearchParams(window.location.search);
+        const sketch = params.get("prompt");
+        if (sketch) {
+            selectedSketchIndex = sketch;
+        }
+    });
 </script>
 
 <main>
@@ -40,8 +50,7 @@
     <h2>entries by <a href="https://d17e.dev" target="_self">d17e.dev</a></h2>
     <div class="header">
 
-        <label for="sketch-selection" style="width: 14rem; margin-right: .5rem;">select sketch:</label>
-        <select on:change={handleSelectSketch} id="sketch-selection">
+        <select on:change={handleSelectSketch} id="sketch-selection" bind:value={selectedSketchIndex} aria-label="select prompt from list">
             {#each sketches as sketch, index}
                 <option value={index}>
                     {sketch.name}
@@ -49,10 +58,13 @@
             {/each}
         </select>
 
-        <div style="width: 3rem;"></div>
+        <div style="width: 1rem;"></div>
         <button class="dice-button" on:click={handleDice} title="reset the sketch">
-            <svg class="dice-svg" width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 8H8.01M16 8H16.01M12 12H12.01M16 16H16.01M8 16H8.01M7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40973 4.40973 4.71569 4.21799 5.09202C4 5.51984 4 6.07989 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.07989 20 7.2 20Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg class="dice-svg" fill="#000000" height="800px" width="800px" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                 viewBox="0 0 512 512" xml:space="preserve">
+                <path d="M512,192V21.3l-64.9,64.9C400.3,33.4,332.2,0,256,0C114.6,0,0,114.6,0,256s114.6,256,256,256c70.7,0,134.7-28.6,181-75
+                    l-45.3-45.2C357,426.5,309,448,256,448c-106,0-192-85.9-192-192c0-106.1,86-192,192-192c58.5,0,110.4,26.5,145.5,67.8L341.3,192H512
+                    z"/>
             </svg>
         </button>
     </div>
@@ -62,6 +74,7 @@
                  reset={selectedSketch.reset}
                  animate={selectedSketch.animation}
                  debug={debug}
+                 ping={ping}
                  />
 
     <div class="footer">
@@ -122,10 +135,11 @@
     }
 
     .dice-button {
-        border: none;
         background-color: transparent;
         cursor: pointer;
         padding: 10px;
+        border: 1px dashed black;
+        border-radius: .5rem;
     }
 
     .dice-button:hover {
@@ -139,9 +153,8 @@
     }
 
     .dice-svg {
-        /*fill: #000;*/
-        width: 50px;
-        height: 50px;
+        width: 20px;
+        height: 20px;
     }
 
     .footer {

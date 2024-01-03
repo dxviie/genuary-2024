@@ -2,10 +2,12 @@
     import { onMount } from 'svelte';
     import paper from 'paper';
 
-    export let sketch;
+    export let sketch = null;
     export let reset = null;
     export let debug = false;
     export let animate = true;
+    export let ping = 0;
+
     let canvas;
 
     onMount(() => {
@@ -28,10 +30,25 @@
         if (paper && paper.project && paper.project.activeLayer) {
             paper.project.activeLayer.removeChildren();
         }
+        if (reset) {
+            reset();
+        }
+        if (animate) {
+            if (paper && paper.view) {
+                paper.view.onFrame = (event) => {
+                    sketch(paper, event, debug);
+                }
+            }
+        } else if (!animate) {
+            paper.view.onFrame = null;
+            sketch(paper, null, debug);
+        }
     }
 
-    $: if (reset) {
-        reset();
+    $: if (ping) {
+        if (!animate) {
+            sketch(paper, null, debug);
+        }
     }
 </script>
 
