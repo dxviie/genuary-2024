@@ -4,15 +4,6 @@
     import {drawGenerativeColors, resetColors} from "$lib/utils/genuary.2024.02.js";
     import {onMount} from "svelte";
 
-    const umamiId = import.meta.env.UMAMI_ID;
-    if (umamiId) {
-        const umamiScript = document.createElement('script');
-        umamiScript.async = true;
-        umamiScript.src = "https://umami.d17e.dev/script.js";
-        umamiScript.dataset.websiteId = umamiId;
-        document.head.appendChild(umamiScript);
-    }
-
     let key = 0;
     let ping = 0;
     let debug = false;
