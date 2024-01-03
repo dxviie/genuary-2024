@@ -13,10 +13,11 @@
         {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors, animation: false}
     ];
     let selectedSketchIndex = 0;
-    $: selectedSketch = sketches[selectedSketchIndex];
+    let selectedSketch = sketches[selectedSketchIndex];
 
     function handleSelectSketch(event) {
         selectedSketchIndex = event.target.value;
+        selectedSketch = sketches[selectedSketchIndex];
         key++;
     }
 
