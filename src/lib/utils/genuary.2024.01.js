@@ -47,12 +47,11 @@ export function clearParticles() {
 export function drawParticles(paper, event, debug) {
 
     if (!text) {
-        text = new paper.PointText(new paper.Point(paper.view.bounds.width * 0.25, paper.view.bounds.width * 0.05));
-        text.justification = 'center';
+        text = new paper.PointText(new paper.Point(10, 10 + paper.view.bounds.width * 0.02));
         text.fillColor = 'black';
         text.fontFamily = 'Courier New';
-        text.fontSize = paper.view.bounds.width * 0.025;
-        text.content = `${PARTICLE_COUNT} particle in ~${iterationTime} second`;
+        text.fontSize = paper.view.bounds.width * 0.02;
+        text.content = `${PARTICLE_COUNT} particle, ~${iterationTime} second`;
     }
 
     // every iteration we remove the old particles
@@ -79,7 +78,7 @@ export function drawParticles(paper, event, debug) {
         }
         GRID_SIZE = Math.sqrt(PARTICLE_COUNT);
 
-        text.content = `${PARTICLE_COUNT} particles in ~${Math.ceil(iterationTime)} seconds`;
+        text.content = `${PARTICLE_COUNT} particles, ~${Math.ceil(iterationTime)} seconds`;
 
         if (emitterPath) {
             emitterPath.remove();
@@ -103,6 +102,12 @@ export function drawParticles(paper, event, debug) {
             radius: 10,
             fillColor: debug ? 'red' : null
         });
+    }
+
+    // create the particles if they don't exist
+    if (particles.length === 0) {
+        // TODO optimization: generate all particles at the start (invisible)
+        console.log('creating particles', PARTICLE_COUNT);
     }
 
     // move the emitter along the path
