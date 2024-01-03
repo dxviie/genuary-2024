@@ -41,6 +41,7 @@
         const sketch = params.get("prompt");
         if (sketch) {
             selectedSketchIndex = sketch;
+            selectedSketch = sketches[selectedSketchIndex];
         }
     });
 </script>
