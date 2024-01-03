@@ -214,7 +214,6 @@ export function drawGenerativeColors(paper, event, debug) {
         const blockSize = canvasSize / gridBlocks;
         const blocks = Math.pow(gridBlocks, 2);
         gridBlocks *= 4;
-        console.log("blocks", blocks, "layerBlocks", layerBlocks);
         if (blocks === 1) {
             shapes.push(createBaseShape(paper, new paper.Point(canvasOffset, canvasOffset), blockSize, colors.baseSet, opacity, blendMode));
         }
