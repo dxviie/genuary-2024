@@ -48,11 +48,11 @@
 
 <main>
 
-    <h1><a href="https://genuary.art" target="_blank">Genuary 2024</a></h1>
-    <h2>entries by <a href="https://d17e.dev" target="_self">d17e.dev</a></h2>
+    <h1><a href="https://genuary.art" target="_blank" data-umami-event="follow-link" data-umami-event-link="genuary.2024">Genuary 2024</a></h1>
+    <h2>entries by <a href="https://d17e.dev" target="_self" data-umami-event="follow-link" data-umami-event-link="d17e.dev">d17e.dev</a></h2>
     <div class="header">
 
-        <select on:change={handleSelectSketch} id="sketch-selection" aria-label="select prompt from list">
+        <select on:change={handleSelectSketch} id="sketch-selection" aria-label="select prompt from list" data-umami-event="sketch-select" data-umami-event-sketch={sketches[selectedSketchIndex].name}>
             {#each sketches as sketch, index}
                 <option value={index}>
                     {sketch.name}
@@ -61,7 +61,7 @@
         </select>
 
         <div style="width: 1rem;"></div>
-        <button class="dice-button" on:click={handleDice} title="reset the sketch">
+        <button class="dice-button" on:click={handleDice} title="reset the sketch" data-umami-event="sketch-refresh" data-umami-event-sketch={sketches[selectedSketchIndex].name}>
             <svg class="dice-svg" fill="#000000" height="800px" width="800px" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                  viewBox="0 0 512 512" xml:space="preserve">
                 <path d="M512,192V21.3l-64.9,64.9C400.3,33.4,332.2,0,256,0C114.6,0,0,114.6,0,256s114.6,256,256,256c70.7,0,134.7-28.6,181-75
@@ -82,7 +82,8 @@
     <div class="footer">
         <div class="debug-container">
             <label for="debug">draw debug lines</label>
-            <input type="checkbox" id="debug" name="debug" on:change={handleDebug} bind:checked={debug}/>
+            <input type="checkbox" id="debug" name="debug" on:change={handleDebug} bind:checked={debug}
+                   data-umami-event="check-debug" data-umami-event-checked={debug} data-umami-event-sketch={sketches[selectedSketchIndex].name}/>
         </div>
     </div>
 </main>
