@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import paper from 'paper';
 
+    export let key = null;
     export let sketch = null;
     export let reset = null;
     export let debug = false;
@@ -52,7 +53,7 @@
     }
 </script>
 
-<div class="canvas-container">
+<div class="canvas-container" id={key}>
     <canvas bind:this={canvas}></canvas>
 </div>
 
