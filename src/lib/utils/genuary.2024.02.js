@@ -1,6 +1,4 @@
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+import {getRandomInt} from "$lib/utils/ToolBox.js";
 
 function generateHarmonicColors(baseHue, numberOfColors, hueShift) {
     let colors = [];

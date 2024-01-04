@@ -3,14 +3,18 @@
     import {clearParticles, drawParticles} from "$lib/utils/genuary.2024.01.js";
     import {drawGenerativeColors, resetColors} from "$lib/utils/genuary.2024.02.js";
     import {onMount} from "svelte";
+    import {clearDroste, drawDroste} from "$lib/utils/genuary.2024.03.js";
+    import {drawPixels, clearPixels} from "$lib/utils/genuary.2024.04.js";
 
     let key = 0;
     let ping = 0;
     let debug = false;
     let sketches = [
-        {name: "00. No sketch selected.", sketch: () => {}, reset: () => {}},
+        {name: "00. Select a prompt...", sketch: () => {}, reset: () => {}},
         {name: "01. Particles. Lots of them.", sketch: drawParticles, reset: clearParticles, animation: true},
-        {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors, animation: false}
+        {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors, animation: false},
+        {name: "03. Droste effect.", sketch: drawDroste, reset: clearDroste, animation: false},
+        {name: "04. Pixels.", sketch: drawPixels, reset: clearPixels, animation: true}
     ];
     let selectedSketchIndex = 0;
     let selectedSketch = sketches[selectedSketchIndex];
