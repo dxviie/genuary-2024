@@ -19,7 +19,7 @@ export function clearPixels() {
     blue = getRandomInt(30, 255);
 }
 
-const PIXEL_DIM = isMobile() ? 16: 27;
+let PIXEL_DIM = 27;
 let screen = null;
 let tracer = null;
 let red = 255;
@@ -27,6 +27,9 @@ let green = 255;
 let blue = 255;
 
 export function drawPixels(paper, event, debug) {
+    if (isMobile()) {
+        PIXEL_DIM = 16;
+    }
     let canvasSize = paper.view.bounds.width * 0.9;
     let canvasOffset = (paper.view.bounds.width - canvasSize) / 2;
     let pixelSize = canvasSize / PIXEL_DIM;
