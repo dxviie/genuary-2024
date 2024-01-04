@@ -1,5 +1,9 @@
 import {getRandomInt} from "$lib/utils/ToolBox.js";
 
+function isMobile() {
+    return navigator && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
 export function clearPixels() {
     if (screen) {
         screen.screen.remove();
@@ -15,7 +19,7 @@ export function clearPixels() {
     blue = getRandomInt(30, 255);
 }
 
-const PIXEL_DIM = 27;
+const PIXEL_DIM = isMobile() ? 16: 27;
 let screen = null;
 let tracer = null;
 let red = 255;
