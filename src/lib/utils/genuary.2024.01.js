@@ -1,5 +1,7 @@
+import {isMobile} from "$lib/utils/ToolBox.js";
+
 let PARTICLE_COUNT = 0;
-const MAX_PARTICLE_COUNT = 5000;
+let MAX_PARTICLE_COUNT = 5000;
 let GRID_SIZE = 0;
 let GRID_ELEMENT_SIZE = 0;
 let GRID_OFFSET = 0;
@@ -47,6 +49,9 @@ export function clearParticles() {
 }
 
 export function drawParticles(paper, event, debug) {
+    if (isMobile()) {
+        MAX_PARTICLE_COUNT = 1100;
+    }
 
     if (!text) {
         text = new paper.PointText(new paper.Point(10, 10 + paper.view.bounds.width * 0.02));
