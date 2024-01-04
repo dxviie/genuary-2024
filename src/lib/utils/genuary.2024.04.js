@@ -24,9 +24,9 @@ export function drawPixels(paper, event, debug) {
     let shift = pixelSize / 4;
 
     const pixelColor = {
-        red: 0,
-        green: 0,
-        blue: 0
+        red: 1,
+        green: 1,
+        blue: 1
     }
 
     for (let x = 0; x < PIXEL_DIM; x++) {
@@ -47,34 +47,31 @@ function createCRTPixel(paper, x, y, size, color, debug) {
     var redStripe = new paper.Path.Rectangle({
         topLeft: new paper.Point(x + padding, y),
         size: new paper.Size(width, size),
-        radius: width/2
+        radius: width/2,
+        strokeColor: 'black',
+        strokeWidth: 0
     });
-    redStripe.fillColor = 'rgb(255, 0, 0)';
-    if (color && color.red) {
-        redStripe.fillColor = `rgb(${color.red}, 0, 0)`;
-    }
+    redStripe.fillColor = (color && color.red) ? new paper.Color(color.red/255, 0, 0) : 'rgb(255, 0, 0)';
 
     // Create the green stripe
     var greenStripe = new paper.Path.Rectangle({
         topLeft: new paper.Point(x + padding + size/3, y),
         size: new paper.Size(width, size),
-        radius: width/2
+        radius: width/2,
+        strokeColor: 'black',
+        strokeWidth: 0
     });
-    greenStripe.fillColor = 'rgb(0, 255, 0)';
-    if (color && color.green) {
-        greenStripe.fillColor = `rgb(0, ${color.green}, 0)`;
-    }
+    greenStripe.fillColor = (color && color.green) ? new paper.Color(0, color.green/255, 0) : 'rgb(0, 255, 0)';
 
     // Create the blue stripe
     var blueStripe = new paper.Path.Rectangle({
         topLeft: new paper.Point(x + padding + size/3 * 2, y),
         size: new paper.Size(width, size),
-        radius: width/2
+        radius: width/2,
+        strokeColor: 'black',
+        strokeWidth: 0
     });
-    blueStripe.fillColor = 'rgb(0, 0, 255)';
-    if (color && color.blue) {
-        blueStripe.fillColor = `rgb(0, 0, ${color.blue})`;
-    }
+    blueStripe.fillColor = (color && color.blue) ? new paper.Color(0, 0, color.blue/255) : 'rgb(0, 0, 255)';
 
     let glow = new paper.Path.Rectangle({
         topLeft: new paper.Point(x, y),
@@ -82,7 +79,8 @@ function createCRTPixel(paper, x, y, size, color, debug) {
         radius: width/2,
         fillColor: color,
         strokeColor: 'rgb(255, 255, 255)',
-        strokeWidth: debug ? 1 : 0
+        strokeWidth: debug ? 1 : 0,
+        opacity: 0.3
     })
 
     // Group the stripes for easier manipulation
