@@ -6,6 +6,7 @@
     import {clearDroste, drawDroste} from "$lib/utils/genuary.2024.03.js";
     import {drawPixels, clearPixels} from "$lib/utils/genuary.2024.04.js";
     import {marked} from "marked";
+    import {clearVera, drawVera} from "$lib/utils/genuary.2024.05.js";
 
     let key = 0;
     let ping = 0;
@@ -15,7 +16,8 @@
         {name: "01. Particles, lots of them.", sketch: drawParticles, reset: clearParticles, animation: true, md: "/md/01.md"},
         {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors, animation: false, md: "/md/02.md"},
         {name: "03. Droste effect.", sketch: drawDroste, reset: clearDroste, animation: false, md: "/md/03.md"},
-        {name: "04. Pixels.", sketch: drawPixels, reset: clearPixels, animation: true, md: "/md/04.md"}
+        {name: "04. Pixels.", sketch: drawPixels, reset: clearPixels, animation: true, md: "/md/04.md"},
+        {name: "05. Vera Molnár (1924-2023)", sketch: drawVera, reset: clearVera, animation: false, md: "/md/05.md"},
     ];
     let selectedSketchIndex = 0;
     let selectedSketch = sketches[selectedSketchIndex];
