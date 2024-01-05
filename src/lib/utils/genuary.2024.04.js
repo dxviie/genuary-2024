@@ -10,9 +10,9 @@ export function clearPixels() {
         tracer.forEach(block => block.remove());
         tracer = null;
     }
-    red = getRandomInt(75, 255);
-    green = getRandomInt(75, 255);
-    blue = getRandomInt(75, 255);
+    red = getRandomInt(100, 255);
+    green = getRandomInt(100, 255);
+    blue = getRandomInt(100, 255);
 }
 
 let PIXEL_DIM = 27;
@@ -38,9 +38,9 @@ export function drawPixels(paper, event, debug) {
         tracer = createTracer(paper, canvasOffset, canvasSize, pixelSize);
     }
 
-    screen.pixels.forEach(pixel => {
+    screen.pixels.filter(pixel => pixel.group.opacity > 0.12).forEach(pixel => {
         pixel.group.opacity -= 0.1;
-        // pixel.group.strokeWidth = debug ? 1 : 0;
+        pixel.group.strokeWidth = debug ? 1 : 0;
     });
 
     let amplitude = (canvasSize / 2) * 0.8;
@@ -150,7 +150,7 @@ function createCRTPixel(paper, x, y, size) {
         fillColor: 'rgb(0, 0, 0)',
         strokeColor: 'rgb(255, 255, 255)',
         strokeWidth: 1,
-        opacity: 0.3
+        opacity: 0.5
     })
 
     // Group the stripes for easier manipulation
