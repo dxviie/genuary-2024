@@ -5,23 +5,29 @@
     import {onMount} from "svelte";
     import {clearDroste, drawDroste} from "$lib/utils/genuary.2024.03.js";
     import {drawPixels, clearPixels} from "$lib/utils/genuary.2024.04.js";
+    import {marked} from "marked";
 
     let key = 0;
     let ping = 0;
     let debug = false;
     let sketches = [
-        {name: "00. Select a prompt...", sketch: () => {}, reset: () => {}},
-        {name: "01. Particles. Lots of them.", sketch: drawParticles, reset: clearParticles, animation: true},
-        {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors, animation: false},
-        {name: "03. Droste effect.", sketch: drawDroste, reset: clearDroste, animation: false},
-        {name: "04. Pixels.", sketch: drawPixels, reset: clearPixels, animation: true}
+        {name: "00. Select a prompt...", sketch: () => {}, reset: () => {}, md: "/md/00.md"},
+        {name: "01. Particles, lots of them.", sketch: drawParticles, reset: clearParticles, animation: true, md: "/md/01.md"},
+        {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors, animation: false, md: "/md/02.md"},
+        {name: "03. Droste effect.", sketch: drawDroste, reset: clearDroste, animation: false, md: "/md/03.md"},
+        {name: "04. Pixels.", sketch: drawPixels, reset: clearPixels, animation: true, md: "/md/04.md"}
     ];
     let selectedSketchIndex = 0;
     let selectedSketch = sketches[selectedSketchIndex];
 
-    function handleSelectSketch(event) {
+    let markdownContent = '';
+    let htmlContent = '';
+    let footerContent = '';
+
+    async function handleSelectSketch(event) {
         selectedSketchIndex = event.target.value;
         selectedSketch = sketches[selectedSketchIndex];
+        handleMarkdown();
         key++;
     }
 
@@ -40,13 +46,28 @@
         key++;
     }
 
+    async function handleMarkdown() {
+        if (selectedSketch && selectedSketch.md) {
+            const response = await fetch(selectedSketch.md);
+            markdownContent = await response.text();
+            htmlContent = marked(markdownContent);
+        }
+    }
+
+    async function loadFooter() {
+        const response = await fetch("/md/footer.md");
+        footerContent = marked(await response.text());
+    }
+
     onMount(() => {
         const params = new URLSearchParams(window.location.search);
         const sketch = params.get("prompt");
         if (sketch) {
             selectedSketchIndex = sketch;
             selectedSketch = sketches[selectedSketchIndex];
+            handleMarkdown();
         }
+        loadFooter();
     });
 </script>
 
@@ -90,6 +111,19 @@
                    data-umami-event="check-debug" data-umami-event-checked={debug} data-umami-event-sketch={sketches[selectedSketchIndex].name}/>
         </div>
     </div>
+
+    {#if selectedSketch.md}
+        <div class="markdown-container">
+            <div class="markdown-content">
+                {@html htmlContent}
+            </div>
+        </div>
+    {/if}
+    <div class="markdown-container">
+        <div class="markdown-content page-footer">
+            {@html footerContent}
+        </div>
+    </div>
 </main>
 
 <style>
@@ -98,25 +132,6 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100vh;
-    }
-
-    h1 {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-
-    h2 {
-        font-size: 1rem;
-        margin-top: -.5rem;
-        margin-bottom: 1rem;
-    }
-
-    a {
-        color: rgba(0, 0, 0, 1);
-        border-style: dashed;
-        border-width: 0 0 1px 0;
-        text-decoration: none;
     }
 
     .header {
@@ -172,5 +187,20 @@
         margin-top: 1rem;
         margin-bottom: 1rem;
         font-size: 1rem;
+    }
+
+    .markdown-container {
+        width: 90vw;
+        max-width: 40rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .page-footer {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+        line-height: 10pt;
     }
 </style>

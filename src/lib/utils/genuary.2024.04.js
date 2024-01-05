@@ -40,7 +40,6 @@ export function drawPixels(paper, event, debug) {
 
     screen.pixels.filter(pixel => pixel.group.opacity > 0.12).forEach(pixel => {
         pixel.group.opacity -= 0.1;
-        pixel.group.strokeWidth = debug ? 1 : 0;
     });
 
     let amplitude = (canvasSize / 2) * 0.8;

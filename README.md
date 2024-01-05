@@ -1,22 +1,17 @@
-# create-svelte
+# d17e.dev's Genuary 2024 entries
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+This is a project based on [Svelte](https://svelte.dev/) (& SvelteKit) and [paper.js](http://paperjs.org/).
 
-## Creating a project
+### What is this?
+It is a collection of my entries for [Genuary 2024](https://genuary.art/prompts). You can find the live project at [genuary.d17e.dev](https://genuary.d17e.dev). The code for each of the prompts is each in its own file, so should be pretty straight forward to find in case you're wondering how I implemented things.
 
-If you're seeing this, you've probably already done this step. Congrats!
+### What is it not?
+It is by no means a source of clean code or best practices. I'm still learning Svelte and paper.js, so I'm sure there are better ways to do things. If you have any suggestions, please let me know!
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Once you've installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
 ```bash
 npm run dev
@@ -24,15 +19,3 @@ npm run dev
 # or start the server and open the app in a new browser tab
 npm run dev -- --open
 ```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
