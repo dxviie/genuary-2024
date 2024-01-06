@@ -50,15 +50,19 @@
 
     async function handleMarkdown() {
         if (selectedSketch && selectedSketch.md) {
-            const response = await fetch(selectedSketch.md);
-            markdownContent = await response.text();
-            htmlContent = marked(markdownContent);
+            loadMarkdown(selectedSketch.md);
         }
     }
 
     async function loadFooter() {
         const response = await fetch("/md/footer.md");
         footerContent = marked(await response.text());
+    }
+
+    async function loadMarkdown(url) {
+        const response = await fetch(url);
+        markdownContent = await response.text();
+        htmlContent = marked(markdownContent);
     }
 
     onMount(() => {
@@ -70,7 +74,9 @@
             handleMarkdown();
         }
         loadFooter();
+        loadMarkdown("/md/00.md");
     });
+
 </script>
 
 <main>
