@@ -53,18 +53,12 @@
 
                 // Create a temporary link to trigger the download
                 var downloadLink = document.createElement('a');
-                downloadLink.href = url;
                 downloadLink.download = getFrameFileName();
+                downloadLink.href = url;
                 downloadLink.target = '_blank';
-
-                // Append the link to the document and trigger the download
-                document.body.appendChild(downloadLink);
                 downloadLink.click();
-
-                // Clean up
-                document.body.removeChild(downloadLink);
-                window.URL.revokeObjectURL(url);
-            }, 'image/png');
+                downloadLink.remove();
+            });
         };
     }
 
