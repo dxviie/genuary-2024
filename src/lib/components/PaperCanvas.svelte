@@ -46,15 +46,25 @@
 
             ctx.drawImage(watermark, x, y, watermarkWidth, watermarkHeight);
 
-            // Now export the temp canvas as an image
-            var image = tempCanvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+            // Convert the canvas to a Blob
+            tempCanvas.toBlob(function(blob) {
+                // Create an object URL for the blob
+                var url = URL.createObjectURL(blob);
 
-            var link = document.createElement('a');
-            link.download = getFrameFileName();
-            link.href = image;
-            link.target = '_blank';
-            link.click();
-            link.remove();
+                // Create a temporary link to trigger the download
+                var downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = getFrameFileName();
+                downloadLink.target = '_blank';
+
+                // Append the link to the document and trigger the download
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+
+                // Clean up
+                document.body.removeChild(downloadLink);
+                window.URL.revokeObjectURL(url);
+            }, 'image/png');
         };
     }
 
