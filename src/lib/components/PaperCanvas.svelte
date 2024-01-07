@@ -3,11 +3,14 @@
     import paper from 'paper';
 
     export let key = null;
+    export let name = null;
     export let sketch = null;
     export let reset = null;
     export let debug = false;
     export let animate = true;
     export let ping = 0;
+
+    let exportedFrames = 0;
 
     let canvas;
 
@@ -47,10 +50,25 @@
             var image = tempCanvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
 
             var link = document.createElement('a');
-            link.download = 'filename.png';
+            link.download = getFrameFileName();
             link.href = image;
+            link.target = '_blank';
             link.click();
+            link.remove();
         };
+    }
+
+    const getFrameFileName = () => {
+        let sketchName = "";
+        if (name) {
+            sketchName = name.toLowerCase();
+            sketchName = sketchName.replaceAll(" ", "-");
+            sketchName = sketchName.replaceAll("(", "");
+            sketchName = sketchName.replaceAll(")", "");
+            sketchName = sketchName.replaceAll(",", "");
+            sketchName = sketchName.replaceAll(".", "");
+        }
+        return `d17e.dev-genuary2024-${sketchName}-${exportedFrames++}.png`;
     }
 
     onMount(() => {
