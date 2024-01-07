@@ -43,7 +43,9 @@ export function drawScreenSaver(paper) {
         logoBox = createLogoBox(paper);
         changeColor();
         velocity = new paper.Point([Math.random() * 2 - 4, Math.random() * 2 - 4]);
-        console.log(velocity)
+        if (isMobile()) {
+            velocity = velocity.multiply(0.3);
+        }
     }
 
     logoBox.position = logoBox.position.add(velocity);
@@ -73,7 +75,7 @@ function createLogoBox(paper) {
     const logo = new paper.Raster('/logo_dvd.png');
     logo.onLoad = () => {
         logo.position = color.position;
-        logo.scale(isMobile() ? 0.2 : 0.5, color.center);
+        logo.scale(isMobile() ? 0.15 : 0.5, color.center);
         logo.bringToFront();
     };
     logo.addTo(box);
