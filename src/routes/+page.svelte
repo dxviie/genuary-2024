@@ -7,17 +7,21 @@
     import {drawPixels, clearPixels} from "$lib/utils/genuary.2024.04.js";
     import {marked} from "marked";
     import {clearVera, drawVera} from "$lib/utils/genuary.2024.05.js";
+    import {clearScreenSaver, drawScreenSaver} from "$lib/utils/genuary.2024.06.js";
+    import {clearSpinner, drawSpinner} from "$lib/utils/genuary.2024.07.js";
 
     let key = 0;
     let ping = 0;
     let debug = false;
     let sketches = [
         {name: "00. Select a prompt...", sketch: () => {}, reset: () => {}, md: "/md/00.md"},
-        {name: "01. Particles, lots of them.", sketch: drawParticles, reset: clearParticles, animation: true, md: "/md/01.md"},
-        {name: "02. No palettes.", sketch: drawGenerativeColors, reset: resetColors, animation: false, md: "/md/02.md"},
-        {name: "03. Droste effect.", sketch: drawDroste, reset: clearDroste, animation: false, md: "/md/03.md"},
-        {name: "04. Pixels.", sketch: drawPixels, reset: clearPixels, animation: true, md: "/md/04.md"},
+        {name: "01. Particles, lots of them", sketch: drawParticles, reset: clearParticles, animation: true, md: "/md/01.md"},
+        {name: "02. No palettes", sketch: drawGenerativeColors, reset: resetColors, animation: false, md: "/md/02.md"},
+        {name: "03. Droste effect", sketch: drawDroste, reset: clearDroste, animation: false, md: "/md/03.md"},
+        {name: "04. Pixels", sketch: drawPixels, reset: clearPixels, animation: true, md: "/md/04.md"},
         {name: "05. Vera Molnár (1924-2023)", sketch: drawVera, reset: clearVera, animation: false, md: "/md/05.md"},
+        {name: "06. Screensaver", sketch: drawScreenSaver, reset: clearScreenSaver, animation: true, md: "/md/06.md"},
+        {name: "07. Progress bar", sketch: drawSpinner, reset: clearSpinner, animation: true, md: "/md/07.md"},
     ];
     let selectedSketchIndex = 0;
     let selectedSketch = sketches[selectedSketchIndex];
