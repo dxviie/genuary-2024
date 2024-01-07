@@ -26,6 +26,8 @@
     let htmlContent = '';
     let footerContent = '';
 
+    let paperCanvas;
+
     async function handleSelectSketch(event) {
         selectedSketchIndex = event.target.value;
         selectedSketch = sketches[selectedSketchIndex];
@@ -46,6 +48,12 @@
             ping++;
         }
         key++;
+    }
+
+    function handleDownload() {
+        if (paperCanvas && paperCanvas.downloadFrame) {
+            paperCanvas.downloadFrame();
+        }
     }
 
     async function handleMarkdown() {
@@ -79,6 +87,11 @@
 
 </script>
 
+
+<!--****************************************************
+ *          content
+****************************************************-->
+
 <main>
 
     <h1><a href="https://genuary.art" target="_blank" data-umami-event="follow-link" data-umami-event-link="genuary.2024">Genuary 2024</a></h1>
@@ -95,16 +108,18 @@
 
         <div style="width: 1rem;"></div>
         <button class="dice-button" on:click={handleDice} title="reset the sketch" data-umami-event="sketch-refresh" data-umami-event-sketch={sketches[selectedSketchIndex].name}>
-            <svg class="dice-svg" fill="#000000" height="800px" width="800px" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                 viewBox="0 0 512 512" xml:space="preserve">
-                <path d="M512,192V21.3l-64.9,64.9C400.3,33.4,332.2,0,256,0C114.6,0,0,114.6,0,256s114.6,256,256,256c70.7,0,134.7-28.6,181-75
-                    l-45.3-45.2C357,426.5,309,448,256,448c-106,0-192-85.9-192-192c0-106.1,86-192,192-192c58.5,0,110.4,26.5,145.5,67.8L341.3,192H512
-                    z"/>
+            <svg class="dice-svg" width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 3V8M21 8H16M21 8L18 5.29168C16.4077 3.86656 14.3051 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.2832 21 19.8675 18.008 20.777 14" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <button class="dice-button second" on:click={handleDownload} title="download frame" data-umami-event="sketch-download-frame" data-umami-event-sketch={sketches[selectedSketchIndex].name}>
+            <svg class="dice-svg" width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17 17H17.01M17.4 14H18C18.9319 14 19.3978 14 19.7654 14.1522C20.2554 14.3552 20.6448 14.7446 20.8478 15.2346C21 15.6022 21 16.0681 21 17C21 17.9319 21 18.3978 20.8478 18.7654C20.6448 19.2554 20.2554 19.6448 19.7654 19.8478C19.3978 20 18.9319 20 18 20H6C5.06812 20 4.60218 20 4.23463 19.8478C3.74458 19.6448 3.35523 19.2554 3.15224 18.7654C3 18.3978 3 17.9319 3 17C3 16.0681 3 15.6022 3.15224 15.2346C3.35523 14.7446 3.74458 14.3552 4.23463 14.1522C4.60218 14 5.06812 14 6 14H6.6M12 15V4M12 15L9 12M12 15L15 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
     </div>
 
-    <PaperCanvas key={key}
+    <PaperCanvas bind:this={paperCanvas} key={key}
                  sketch={selectedSketch.sketch}
                  reset={selectedSketch.reset}
                  animate={selectedSketch.animation}
@@ -134,6 +149,9 @@
     </div>
 </main>
 
+<!--****************************************************
+ *          styles
+*****************************************************-->
 <style>
     main {
         display: flex;
@@ -180,6 +198,10 @@
     .dice-button:active {
         transform: translate(1px, 1px);
         transition: transform 0.1s ease-in-out;
+    }
+
+    .dice-button.second {
+        margin-left: .5rem;
     }
 
     .dice-svg {

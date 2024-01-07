@@ -11,6 +11,48 @@
 
     let canvas;
 
+    export function downloadFrame() {
+        if (!canvas) {
+            return;
+        }
+        var tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+
+        var ctx = tempCanvas.getContext('2d');
+
+        // Fill the temp canvas with white background
+        ctx.fillStyle = '#ffffff'; // Set color to white
+        ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+        // Draw the original canvas onto the temp canvas
+        ctx.drawImage(canvas, 0, 0);
+
+        // Load and draw the watermark
+        var watermark = new Image();
+        watermark.src = 'watermark.png'; // Path to your watermark image
+        watermark.onload = function() {
+            // Set the desired width and height for the watermark
+            var scale = 0.5; // Example scale factor (50%)
+            var watermarkWidth = watermark.width * scale;
+            var watermarkHeight = watermark.height * scale;
+
+            // Position the watermark at the bottom right corner, adjust as needed
+            var x = tempCanvas.width - watermarkWidth - 10; // 10px padding from right
+            var y = tempCanvas.height - watermarkHeight - 10; // 10px padding from bottom
+
+            ctx.drawImage(watermark, x, y, watermarkWidth, watermarkHeight);
+
+            // Now export the temp canvas as an image
+            var image = tempCanvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+
+            var link = document.createElement('a');
+            link.download = 'filename.png';
+            link.href = image;
+            link.click();
+        };
+    }
+
     onMount(() => {
         paper.setup(canvas);
         if (sketch && typeof sketch === 'function') {

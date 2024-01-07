@@ -135,6 +135,7 @@ export function drawParticles(paper, event, debug) {
         }
     }
 
+    // TODO: possible optimization?: pushing fading out to the browser (CSS opacity transform)
     let visibleParticleCount = 0;
     particles.forEach((particle) => {
         if (!particle.active) { return; }
