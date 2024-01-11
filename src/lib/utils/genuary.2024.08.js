@@ -1,4 +1,4 @@
-import {getRandomInt} from "$lib/utils/ToolBox.js";
+import {getPixelRatio, getRandomInt} from "$lib/utils/ToolBox.js";
 
 export function clearChaos() {
     planets.forEach(planet => {
@@ -19,7 +19,7 @@ let button = null;
 let text = null;
 let paused = true;
 const G = 1;
-const speedUp = 3 / window.devicePixelRatio;
+const speedUp = 3 / getPixelRatio();
 let scaleFactor;
 // Thank you mws262@github for the stable configurations
 // https://github.com/mws262/MAE5730_examples/tree/master/3BodySolutions
@@ -37,14 +37,14 @@ export function drawChaos(paper, event, debug) {
     if (!planets || planets.length === 0) {
         scaleFactor = paper.view.size.width/4;
         config = stableConfigurations[getRandomInt(0, stableConfigurations.length - 1)];
-        const bodies = createBodiesAtNormalizedPositions(paper, config.positions, config.velocities, 20 / window.devicePixelRatio, 1);
+        const bodies = createBodiesAtNormalizedPositions(paper, config.positions, config.velocities, 20 / getPixelRatio(), 1);
         bodies.forEach(b => planets.push(b));
     }
 
     if (!button) {
         button = createPlayButton(paper);
         text = new paper.PointText({
-            point: [button.position.x + 50/window.devicePixelRatio, button.position.y + 10/window.devicePixelRatio],
+            point: [button.position.x + 50/getPixelRatio(), button.position.y + 10/getPixelRatio()],
             content: `${config.name}`,
             fillColor: 'red',
             fontSize: 20,
@@ -177,7 +177,7 @@ function createBodiesAtNormalizedPositions(paper, positions, velocities, radius,
 
 function createPlayButton(paper) {
     let button = new paper.Path.Rectangle({
-        point: [20/window.devicePixelRatio, 20/window.devicePixelRatio], // [paper.view.center.x, paper.view.center.y],
+        point: [20/getPixelRatio(), 20/getPixelRatio()], // [paper.view.center.x, paper.view.center.y],
         size: [40, 40],
         fillColor: 'red',
         radius: 10,
