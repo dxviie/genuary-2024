@@ -5,7 +5,3 @@ export function getRandomInt(min, max) {
 export function isMobile() {
     return navigator && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
-
-export function getPixelRatio() {
-    return window.devicePixelRatio || 1;
-}

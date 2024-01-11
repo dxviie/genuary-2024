@@ -1,4 +1,4 @@
-import {getPixelRatio, getRandomInt} from "$lib/utils/ToolBox.js";
+import {getRandomInt} from "$lib/utils/ToolBox.js";
 
 export function clearChaos() {
     planets.forEach(planet => {
@@ -195,4 +195,8 @@ function createPlayButton(paper) {
         paused = !paused;
     }
     return group;
+}
+
+function getPixelRatio() {
+    return (typeof window !== "undefined") ? window.devicePixelRatio : 1;
 }
