@@ -1,3 +1,5 @@
+import {getRandomInt} from "$lib/utils/ToolBox.js";
+
 export function clearChaos() {
     planets.forEach(planet => {
         planet.body.remove();
@@ -6,6 +8,7 @@ export function clearChaos() {
     planets = [];
     if (button) {
         button.remove();
+        text.remove();
         button = null;
     }
     paused = true;
@@ -13,25 +16,39 @@ export function clearChaos() {
 
 let planets = [];
 let button = null;
+let text = null;
 let paused = true;
-const G = 9.81;
+const G = 1;
+const speedUp = 3 / window.devicePixelRatio;
+let scaleFactor;
+// Thank you mws262@github for the stable configurations
+// https://github.com/mws262/MAE5730_examples/tree/master/3BodySolutions
+const stableConfigurations = [
+    {name: "Figure eight", positions: [[-0.81763, 0.23240], [0.84385, -0.19304], [-0.02622, -0.03936]], velocities: [[-0.54984, -0.43428], [-0.46887, -0.48393], [1.01870, 0.91821]]},
+    {name: "Triple rings", positions: [[-0.03470, 1.18562], [0.26930, -1.00202], [-0.23280, -0.59780]], velocities: [[0.24946, -0.10756], [0.20587, -0.93957], [-0.45533, 1.04713]]},
+    {name: "Flower circle", positions: [[-0.60289, 0.05916], [0.25271, 0.05825], [-0.35539, 0.03832]], velocities: [[0.12291, 0.74744], [-0.01933, 1.36924], [-0.10359, -2.11669]]},
+    {name: "Double rings", positions: [[0.48666, 0.75504], [-0.68174, 0.29366], [-0.02260, -0.61265]], velocities: [[-0.18271, 0.36301], [-0.57907, -0.74816], [0.76178, 0.38514]]},
+    {name: "Tango orbit", positions: [[0.66616, -0.08192], [-0.02519, 0.45445], [-0.10301, -0.76581]], velocities: [[0.84120, 0.02975], [0.14264, -0.49232], [-0.98385, 0.46257]]}
+    ];
 
 export function drawChaos(paper, event, debug) {
 
+    let config;
     if (!planets || planets.length === 0) {
-        /*
-        (array([ 1.42907461e+84, -1.67890934e+84,  2.80312229e+84]),
-             [(1, 0), (-1, 0), (0, 1.7320508075688772)],
-             [(1, 0), (-1, 0), (0, -1.7320508075688772)])
-         */
-        let b1 = createBody(paper, [300, 300], 20, 100, [0, 0]);
-        let b2 = createBody(paper, [500, 300], 20, 100, [0, 0]);
-        let b3 = createBody(paper, [400, 480], 20, 100, [0, 0]);
-        planets.push(b1, b2, b3);
+        scaleFactor = paper.view.size.width/4;
+        config = stableConfigurations[getRandomInt(0, stableConfigurations.length - 1)];
+        const bodies = createBodiesAtNormalizedPositions(paper, config.positions, config.velocities, 20 / window.devicePixelRatio, 1);
+        bodies.forEach(b => planets.push(b));
     }
 
     if (!button) {
         button = createPlayButton(paper);
+        text = new paper.PointText({
+            point: [button.position.x + 50/window.devicePixelRatio, button.position.y + 10/window.devicePixelRatio],
+            content: `${config.name}`,
+            fillColor: 'red',
+            fontSize: 20,
+        });
     }
 
     if (paused) {
@@ -39,35 +56,45 @@ export function drawChaos(paper, event, debug) {
     }
     else {
         button.opacity = 0;
+        text.opacity = 0;
     }
 
-    // update velocity
-    // Thank you Sebastian! https://www.youtube.com/watch?v=7axImc1sxa0
-    for (let i = 0; i < planets.length; i++) {
-        let planet = planets[i];
-        let currentVelocity = planet.velocity;
-        for (let j = 0; j < planets.length; j++) {
-            if (i === j) continue;
-            let other = planets[j];
-            let distance = other.body.position.subtract(planet.body.position);
-            let squaredDistance = distance.dot(distance);
-            let forceDirection = distance.normalize();
-            let force = forceDirection.multiply(G * planet.mass * other.mass / squaredDistance);
-            let acceleration = force.divide(planet.mass);
-            currentVelocity = currentVelocity.add(acceleration);
+    updatePlanets(paper);
+}
+
+function updatePlanets(paper) {
+    for (let s = 0;  s < speedUp; s++) {
+        // Algorithm edited form Sebastian Lague's video on Solar Systems
+        // Thank you, Sebastian! https://www.youtube.com/watch?v=7axImc1sxa0
+
+        // update velocity
+        for (let i = 0; i < planets.length; i++) {
+            let planet = planets[i];
+            let currentVelocity = planet.velocity;
+            for (let j = 0; j < planets.length; j++) {
+                if (i === j) continue;
+                let other = planets[j];
+                // had to divide by sqrt(scaleFactor) as we're scaling the positions of the planets to fit the screen
+                let distance = other.body.position.subtract(planet.body.position).divide(Math.sqrt(scaleFactor));
+                let squaredDistance = distance.dot(distance);
+                let forceDirection = distance.normalize();
+                let force = forceDirection.multiply(G * planet.mass * other.mass / squaredDistance);
+                let acceleration = force.divide(planet.mass);
+                currentVelocity = currentVelocity.add(acceleration);
+            }
+            planet.velocity = currentVelocity;
         }
-        planet.velocity = currentVelocity;
-    }
 
-    // update position
-    for (let i = 0; i < planets.length; i++) {
-        let planet = planets[i];
-        planet.body.position = planet.body.position.add(planet.velocity);
-        planet.velocityVector.position = planet.body.position;
-        planet.velocityVector.children[0].segments[0].point = planet.body.position;
-        let extraVelocity = new paper.Point(planet.velocity.x*50, planet.velocity.y*50);
-        planet.velocityVector.children[0].segments[1].point = planet.body.position.add(extraVelocity);
-        planet.velocityVector.children[1].position = planet.body.position.add(extraVelocity);
+        // update position
+        for (let i = 0; i < planets.length; i++) {
+            let planet = planets[i];
+            planet.body.position = planet.body.position.add(planet.velocity);
+            planet.velocityVector.position = planet.body.position;
+            planet.velocityVector.children[0].segments[0].point = planet.body.position;
+            let extraVelocity = new paper.Point(planet.velocity.x * 50, planet.velocity.y * 50);
+            planet.velocityVector.children[0].segments[1].point = planet.body.position.add(extraVelocity);
+            planet.velocityVector.children[1].position = planet.body.position.add(extraVelocity);
+        }
     }
 }
 
@@ -137,9 +164,20 @@ function createBody(paper, center, radius, mass, velocity) {
     }
 }
 
+function createBodiesAtNormalizedPositions(paper, positions, velocities, radius, mass) {
+    let bodies = [];
+    for (let i = 0; i < positions.length; i++) {
+        let transformX = (positions[i][0] * scaleFactor) + paper.view.center.x;
+        let transformY = (positions[i][1] * scaleFactor) + paper.view.center.y;
+        let body = createBody(paper, [transformX, transformY], radius, mass, velocities[i]);
+        bodies.push(body);
+    }
+    return bodies;
+}
+
 function createPlayButton(paper) {
     let button = new paper.Path.Rectangle({
-        point: [paper.view.center.x, paper.view.center.y],
+        point: [20/window.devicePixelRatio, 20/window.devicePixelRatio], // [paper.view.center.x, paper.view.center.y],
         size: [40, 40],
         fillColor: 'red',
         radius: 10,

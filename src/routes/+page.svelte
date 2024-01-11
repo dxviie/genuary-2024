@@ -9,7 +9,7 @@
     import {clearVera, drawVera} from "$lib/utils/genuary.2024.05.js";
     import {clearScreenSaver, drawScreenSaver} from "$lib/utils/genuary.2024.06.js";
     import {clearSpinner, drawSpinner} from "$lib/utils/genuary.2024.07.js";
-    // import {clearChaos, drawChaos} from "$lib/utils/genuary.2024.08.js";
+    import {clearChaos, drawChaos} from "$lib/utils/genuary.2024.08.js";
 
     let key = 0;
     let ping = 0;
@@ -23,7 +23,7 @@
         {name: "05. Vera Molnár (1924-2023)", sketch: drawVera, reset: clearVera, animation: false, md: "/md/05.md"},
         {name: "06. Screensaver", sketch: drawScreenSaver, reset: clearScreenSaver, animation: true, md: "/md/06.md"},
         {name: "07. Progress bar", sketch: drawSpinner, reset: clearSpinner, animation: true, md: "/md/07.md"},
-        // {name: "08. Chaotic system", sketch: drawChaos, reset: clearChaos, animation: true, md: "/md/08.md"},
+        {name: "08. Chaotic system", sketch: drawChaos, reset: clearChaos, animation: true, md: "/md/08.md"},
     ];
     let selectedSketchIndex = 0;
     let selectedSketch = sketches[selectedSketchIndex];
