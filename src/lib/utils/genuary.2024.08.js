@@ -85,7 +85,7 @@ export function drawChaos(paper, event, debug) {
 
     if (planets.filter(p => !p.dead || p.trail.segments.length > 0).length === 0) {
         gameOver = new paper.PointText({
-            point: [paper.view.center.x - 500/getPixelRatio(), paper.view.center.y],
+            point: [20/getPixelRatio(), paper.view.center.y],
             content: "everybody died.\ntry again.",
             fillColor: 'orangered',
             fontSize: 75,
