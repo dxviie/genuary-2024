@@ -208,7 +208,7 @@ function createBodiesAtNormalizedPositions(paper, debug, positions, velocities, 
 function createPlayButton(paper) {
     let button = new paper.Path.Rectangle({
         point: [20/getPixelRatio(), 20/getPixelRatio()], // [paper.view.center.x, paper.view.center.y],
-        size: [50/getPixelRatio(), 50/getPixelRatio()],
+        size: [40],
         fillColor: 'orangered',
         radius: 10/getPixelRatio(),
     });
@@ -244,7 +244,7 @@ function generateNightSkyRaster(paper) {
     var starCount = 200; // Number of stars
     for (var i = 0; i < starCount; i++) {
         var position = paper.Point.random().multiply(paper.view.bounds.width);
-        var radius = Math.random() * 3; // Random size for stars
+        var radius = Math.random() * 3/getPixelRatio(); // Random size for stars
         var star = new paper.Path.Circle(position, radius);
         star.fillColor = 'white';
         star.opacity = Math.random(); // Random opacity for a twinkling effect
