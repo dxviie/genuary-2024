@@ -9,6 +9,7 @@
     export let debug = false;
     export let animate = true;
     export let ping = 0;
+    export let record = false;
 
     let exportedFrames = 0;
 
@@ -97,22 +98,43 @@
         }
         if (reset) {
             reset();
+            if (paper && paper.project && paper.project.activeLayer) {
+                paper.project.activeLayer.removeChildren();
+            }
+            if(record) {
+                downloadFrame();
+            }
         }
         if (animate) {
             if (paper && paper.view) {
                 paper.view.onFrame = (event) => {
+                    if (record) {
+                        let myEvent = {
+                            delta: event.delta,
+                            time: event.count/60,
+                            count: event.count
+                        }
+                        sketch(paper, myEvent, debug);
+                        downloadFrame();
+                    }
                     sketch(paper, event, debug);
                 }
             }
         } else if (!animate) {
             paper.view.onFrame = null;
             sketch(paper, null, debug);
+            if (record) {
+                downloadFrame();
+            }
         }
     }
 
     $: if (ping) {
         if (!animate) {
             sketch(paper, null, debug);
+            if (record) {
+                downloadFrame();
+            }
         }
     }
 </script>

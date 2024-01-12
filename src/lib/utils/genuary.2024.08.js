@@ -20,6 +20,10 @@ export function clearChaos() {
     }
     paused = true;
     colors = generateHarmonicColors(getRandomInt(0, 360), 3, 50);
+    if (gameOver) {
+        gameOver.remove();
+        gameOver = null;
+    }
 }
 
 let colors = generateHarmonicColors(getRandomInt(0, 360), 3, 50);
@@ -32,6 +36,7 @@ const G = 1;
 const speedUp = 3 / getPixelRatio();
 let scaleFactor;
 let currentIndex = 0;
+let gameOver = null;
 // Thank you mws262@github for the stable configurations
 // https://github.com/mws262/MAE5730_examples/tree/master/3BodySolutions
 const stableConfigurations = [
@@ -74,7 +79,44 @@ export function drawChaos(paper, event, debug) {
         text.opacity = 0;
     }
 
+    if (gameOver) {
+        return;
+    }
+
+    if (planets.filter(p => !p.dead || p.trail.segments.length > 0).length === 0) {
+        gameOver = new paper.PointText({
+            point: [paper.view.center.x - 500/getPixelRatio(), paper.view.center.y],
+            content: "everybody died.\ntry again.",
+            fillColor: 'orangered',
+            fontSize: 75,
+            fontFamily: 'courier new'
+        });
+    }
+
+    deathCheck(paper);
     updatePlanets(paper, debug);
+}
+
+function deathCheck(paper) {
+    const crashOverlap = planets[0].body.area * 0.1;
+    for (let i = 0; i < planets.length; i++) {
+        let planetA = planets[i];
+        for (let j = 0; j < planets.length; j++) {
+            if (i === j) continue;
+            let planetB = planets[j];
+            let overlap = planetA.body.intersect(planetB.body);
+            if (overlap.area > crashOverlap) {
+                planetA.dead = true;
+                planetB.dead = true;
+            }
+            overlap.remove();
+        }
+
+        if (!planetA.dead && planetA.body.position.x < 0 || planetA.body.position.x > paper.view.size.width
+            || planetA.body.position.y < 0 || planetA.body.position.y > paper.view.size.height) {
+                planetA.dead = true;
+        }
+    }
 }
 
 function updatePlanets(paper, debug) {
@@ -103,6 +145,15 @@ function updatePlanets(paper, debug) {
         // update position
         for (let i = 0; i < planets.length; i++) {
             let planet = planets[i];
+            if (planet.dead) {
+                if (planet.trail.segments.length > 0) {
+                    planet.trail.removeSegment(0);
+                    planet.body.fillColor = 'orangered'
+                    planet.body.opacity = 0.85;
+                    planet.trail.opacity = planet.trail.segments.length / 200;
+                }
+                continue;
+            }
             planet.body.position = planet.body.position.add(planet.velocity);
             planet.velocityHandle.position = planet.body.position;
             planet.trail.add(planet.velocityHandle.position);
@@ -141,6 +192,16 @@ function createBody(paper, debug, center, radius, mass, velocity, color) {
     })
     let velocityHandle = new paper.Group([line, dot]);
 
+    // trail
+    var trail = new paper.Path({
+        strokeColor: color,
+        strokeWidth: 50/getPixelRatio(),
+        strokeCap: 'round',
+        opacity: 0.5,
+        blendMode: 'hard-light'
+    });
+    trail.add(body.position);
+
     // move the body around when clicked on:
     body.onMouseDown = () => {
         body.dragging = true;
@@ -151,6 +212,7 @@ function createBody(paper, debug, center, radius, mass, velocity, color) {
     body.onMouseDrag = (event) => {
         if (paused && body.dragging) {
             body.position = event.point;
+            trail.segments.forEach(s => s.point = event.point);
             velocityHandle.position = event.point;
             velocityHandle.children[0].segments[0].point = event.point;
             let extraVelocity = new paper.Point(velocity[0]*50, velocity[1]*50);
@@ -177,15 +239,8 @@ function createBody(paper, debug, center, radius, mass, velocity, color) {
     }
     velocityHandle.opacity = debug ? 1 : 0;
 
-    var trail = new paper.Path({
-        strokeColor: color,
-        strokeWidth: 50/getPixelRatio(),
-        strokeCap: 'round',
-        opacity: 0.5,
-        blendMode: 'screen'
-    });
-
     return {
+        dead: false,
         body: body,
         mass: mass,
         trail: trail,
