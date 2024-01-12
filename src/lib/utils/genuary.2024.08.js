@@ -1,4 +1,4 @@
-import {getRandomInt} from "$lib/utils/ToolBox.js";
+import {generateHarmonicColors, getRandomInt} from "$lib/utils/ToolBox.js";
 
 export function clearChaos() {
     if (paused) {
@@ -9,15 +9,22 @@ export function clearChaos() {
         planet.velocityHandle.remove();
     });
     planets = [];
+    if (sky) {
+        sky.remove();
+        sky = null;
+    }
     if (button) {
         button.remove();
         text.remove();
         button = null;
     }
     paused = true;
+    colors = generateHarmonicColors(getRandomInt(0, 360), 3, 50);
 }
 
+let colors = generateHarmonicColors(getRandomInt(0, 360), 3, 50);
 let planets = [];
+let sky = null;
 let button = null;
 let text = null;
 let paused = true;
@@ -37,6 +44,9 @@ const stableConfigurations = [
 
 export function drawChaos(paper, event, debug) {
 
+    if (!sky) {
+        sky = generateNightSkyRaster(paper);
+    }
     let config;
     if (!planets || planets.length === 0) {
         scaleFactor = paper.view.size.width/4;
@@ -44,6 +54,7 @@ export function drawChaos(paper, event, debug) {
         const bodies = createBodiesAtNormalizedPositions(paper, debug, config.positions, config.velocities, 20 / getPixelRatio(), 1);
         bodies.forEach(b => planets.push(b));
     }
+
 
     if (!button) {
         button = createPlayButton(paper);
@@ -94,6 +105,10 @@ function updatePlanets(paper, debug) {
             let planet = planets[i];
             planet.body.position = planet.body.position.add(planet.velocity);
             planet.velocityHandle.position = planet.body.position;
+            planet.trail.add(planet.velocityHandle.position);
+            if (planet.trail.segments.length > 200/getPixelRatio()) {
+                planet.trail.removeSegment(0);
+            }
             planet.velocityHandle.children[0].segments[0].point = planet.body.position;
             let extraVelocity = new paper.Point(planet.velocity.x * 50, planet.velocity.y * 50);
             planet.velocityHandle.children[0].segments[1].point = planet.body.position.add(extraVelocity);
@@ -103,11 +118,11 @@ function updatePlanets(paper, debug) {
     }
 }
 
-function createBody(paper, debug, center, radius, mass, velocity) {
+function createBody(paper, debug, center, radius, mass, velocity, color) {
     let body = new paper.Path.Circle({
         center: center,
         radius: radius,
-        fillColor: 'black',
+        fillColor: color,
     });
     let velocityPoint = new paper.Point(velocity[0], velocity[1]);
 
@@ -162,9 +177,18 @@ function createBody(paper, debug, center, radius, mass, velocity) {
     }
     velocityHandle.opacity = debug ? 1 : 0;
 
+    var trail = new paper.Path({
+        strokeColor: color,
+        strokeWidth: 50/getPixelRatio(),
+        strokeCap: 'round',
+        opacity: 0.5,
+        blendMode: 'screen'
+    });
+
     return {
         body: body,
         mass: mass,
+        trail: trail,
         velocity: velocityPoint,
         velocityHandle: velocityHandle
     }
@@ -175,7 +199,7 @@ function createBodiesAtNormalizedPositions(paper, debug, positions, velocities, 
     for (let i = 0; i < positions.length; i++) {
         let transformX = (positions[i][0] * scaleFactor) + paper.view.center.x;
         let transformY = (positions[i][1] * scaleFactor) + paper.view.center.y;
-        let body = createBody(paper, debug, [transformX, transformY], radius, mass, velocities[i]);
+        let body = createBody(paper, debug, [transformX, transformY], radius, mass, velocities[i], colors[i]);
         bodies.push(body);
     }
     return bodies;
@@ -205,4 +229,26 @@ function createPlayButton(paper) {
 
 function getPixelRatio() {
     return (typeof window !== "undefined") ? window.devicePixelRatio : 1;
+}
+
+function generateNightSkyRaster(paper) {
+    var sky = new paper.Group();
+    var nightSky = new paper.Raster({
+        size: paper.view.bounds.size,
+        position: paper.view.center
+    });
+    nightSky.context.fillStyle = 'black';
+    nightSky.context.fillRect(0, 0, nightSky.width, nightSky.height);
+    sky.addChild(nightSky);
+
+    var starCount = 200; // Number of stars
+    for (var i = 0; i < starCount; i++) {
+        var position = paper.Point.random().multiply(paper.view.bounds.width);
+        var radius = Math.random() * 3; // Random size for stars
+        var star = new paper.Path.Circle(position, radius);
+        star.fillColor = 'white';
+        star.opacity = Math.random(); // Random opacity for a twinkling effect
+        sky.addChild(star);
+    }
+    return sky;
 }

@@ -1,15 +1,4 @@
-import {getRandomInt} from "$lib/utils/ToolBox.js";
-
-function generateHarmonicColors(baseHue, numberOfColors, hueShift) {
-    let colors = [];
-    const lightness = 50 + getRandomInt(0, 50);
-    const chroma = 100 + getRandomInt(0, 130);
-    for (let i = 0; i < numberOfColors; i++) {
-        let hue = (baseHue + i * hueShift) % 360;
-        colors.push(`lch(${lightness}% ${chroma} ${hue}deg)`);
-    }
-    return colors;
-}
+import {generateHarmonicColors, getRandomInt} from "$lib/utils/ToolBox.js";
 
 function generateColorPalette() {
     // Generate a random base hue for the first set
@@ -27,7 +16,6 @@ function generateColorPalette() {
         contrastSet: harmonicSet2
     };
 }
-
 function createBaseShape(paper, topLeftPoint, size, palette, opacity, blendMode) {
     let shapeSelect = getRandomInt(1, 2);
     let path = null;
