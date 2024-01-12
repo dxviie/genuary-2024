@@ -50,6 +50,17 @@
 			margin-left: 0;
 			padding-left: 1rem;
 		}
+		pre {
+			background-color: rgba(0, 0, 0, 0.1);
+			padding: 0.1rem 0.3rem;
+			border-radius: 0.3rem;
+			line-height: 1.2rem;
+		}
+		code {
+			font-family: 'Courier New', Courier, monospace;
+			font-size: 0.8rem;
+
+		}
 		a {
 			color: rgba(0, 0, 0, 1);
 			border-style: dashed;
@@ -73,6 +84,20 @@
 			z-index: 1;
 			border-color: rgba(255, 165, 0, 0.5) !important;
 			box-shadow: 0 0 0 1px rgba(255, 165, 0, 0.5) !important;
+		}
+		.centered {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			border-width: 1px;
+			border-style: dashed;
+			padding: 1rem;
+		}
+		.img-text {
+			flex-direction: column;
+			font-size: small;
+			line-height: 1.2rem;
+			margin-left: 1rem;
 		}
 	</style>
 	<body data-sveltekit-preload-data="hover">
