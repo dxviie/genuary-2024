@@ -64,7 +64,7 @@ export function drawChaos(paper, event, debug) {
     if (!button) {
         button = createPlayButton(paper);
         text = new paper.PointText({
-            point: [button.position.x + 50/getPixelRatio(), button.position.y + 10/getPixelRatio()],
+            point: [button.position.x + 40, button.position.y + 10/getPixelRatio()],
             content: `${config.name}`,
             fillColor: 'orangered',
             fontSize: 20,
@@ -88,7 +88,7 @@ export function drawChaos(paper, event, debug) {
             point: [20/getPixelRatio(), paper.view.center.y],
             content: "everybody died.\ntry again.",
             fillColor: 'orangered',
-            fontSize: 75,
+            fontSize: 75/getPixelRatio(),
             fontFamily: 'courier new'
         });
     }
