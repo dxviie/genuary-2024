@@ -98,7 +98,7 @@ export function drawChaos(paper, event, debug) {
 }
 
 function deathCheck(paper) {
-    const crashOverlap = planets[0].body.area * 0.1;
+    const crashOverlap = planets[0].body.area * 0.2;
     for (let i = 0; i < planets.length; i++) {
         let planetA = planets[i];
         for (let j = 0; j < planets.length; j++) {
