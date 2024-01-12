@@ -181,7 +181,7 @@
     select {
         width: 100%;
         background-color: rgba(255, 255, 255, 1);
-        font-family: "Courier New", Courier, monospace;
+        font-family: 'Bitter', serif;
         padding: 0.8rem;
         font-size: 1rem;
         border-radius: .5rem;

@@ -4,6 +4,7 @@
 		<title>d17e.dev's #genuary2024</title>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+		<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400&family=Poppins:wght@300&display=swap" rel="stylesheet">
 		<meta name="description" content="Genuary is the generative art month of the year. 31 days, 31 prompts, 31 sketches. Ish. " />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name=”robots” content="index, follow">
@@ -20,14 +21,16 @@
 	<style>
 		body {
 			margin: 0;
-			font-family: "Courier New", Courier, monospace;
+			font-family: 'Poppins', sans-serif;
 			line-height: 22pt;
 		}
 		h1 {
+			font-family: 'Bitter', serif;
 			font-size: 2rem;
 			margin-bottom: 1rem;
 		}
 		h2 {
+			font-family: 'Bitter', serif;
 			font-size: 1rem;
 			margin-top: -.5rem;
 			margin-bottom: 1rem;
@@ -55,6 +58,21 @@
 		}
 		a:hover {
 			color: orangered;
+		}
+		.markdown-container h1,
+		.markdown-container h2,
+		.markdown-container h3 {
+			font-family: 'Bitter', serif;
+		}
+		::selection {
+			/* orange RGB color (= dark accent color), with alpha */
+			background: rgba(255, 165, 0, 0.5);
+		}
+
+		input:focus-visible {
+			z-index: 1;
+			border-color: rgba(255, 165, 0, 0.5) !important;
+			box-shadow: 0 0 0 1px rgba(255, 165, 0, 0.5) !important;
 		}
 	</style>
 	<body data-sveltekit-preload-data="hover">
