@@ -73,7 +73,9 @@
             sketchName = sketchName.replaceAll(",", "");
             sketchName = sketchName.replaceAll(".", "");
         }
-        return `d17e.dev-genuary2024-${sketchName}-${exportedFrames++}.png`;
+        let now = new Date();
+        let timestamp = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}-${now.getHours()}${now.getMinutes()}`;
+        return `d17e.dev-genuary2024-${sketchName}-${timestamp}//${exportedFrames++}.png`;
     }
 
     onMount(() => {
@@ -121,7 +123,7 @@
                 }
             }
         } else if (!animate) {
-            paper.view.onFrame = null;
+            if (paper && paper.view) paper.view.onFrame = null;
             sketch(paper, null, debug);
             if (record) {
                 downloadFrame();

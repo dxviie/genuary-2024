@@ -10,12 +10,13 @@
     import {clearScreenSaver, drawScreenSaver} from "$lib/utils/genuary.2024.06.js";
     import {clearSpinner, drawSpinner} from "$lib/utils/genuary.2024.07.js";
     import {clearChaos, drawChaos} from "$lib/utils/genuary.2024.08.js";
+    import {clearAscii, drawAscii} from "$lib/utils/genuary.2024.09.js";
 
     let key = 0;
     let ping = 0;
     let debug = false;
     let sketches = [
-        {name: "00. Select a prompt...", sketch: () => {}, reset: () => {}, md: "/md/00.md"},
+        {name: "00. Select a prompt...", sketch: () => {}, reset: () => {}, animation: false, md: "/md/00.md"},
         {name: "01. Particles, lots of them", sketch: drawParticles, reset: clearParticles, animation: true, md: "/md/01.md"},
         {name: "02. No palettes", sketch: drawGenerativeColors, reset: resetColors, animation: false, md: "/md/02.md"},
         {name: "03. Droste effect", sketch: drawDroste, reset: clearDroste, animation: false, md: "/md/03.md"},
@@ -24,6 +25,7 @@
         {name: "06. Screensaver", sketch: drawScreenSaver, reset: clearScreenSaver, animation: true, md: "/md/06.md"},
         {name: "07. Progress bar", sketch: drawSpinner, reset: clearSpinner, animation: true, md: "/md/07.md"},
         {name: "08. Chaotic system", sketch: drawChaos, reset: clearChaos, animation: true, md: "/md/08.md"},
+        {name: "09. ASCII", sketch: drawAscii, reset: clearAscii, animation: true, md: "/md/09.md"},
     ];
     let selectedSketchIndex = 0;
     let selectedSketch = sketches[selectedSketchIndex];
@@ -33,6 +35,9 @@
     let footerContent = '';
 
     let paperCanvas;
+
+    let isLocalHost = false;
+    let recording = false;
 
     async function handleSelectSketch(event) {
         selectedSketchIndex = event.target.value;
@@ -91,6 +96,7 @@
             loadMarkdown("/md/00.md");
         }
         loadFooter();
+        isLocalHost = window.location.hostname === "localhost";
     });
 
 </script>
@@ -125,6 +131,18 @@
                 <path d="M17 17H17.01M17.4 14H18C18.9319 14 19.3978 14 19.7654 14.1522C20.2554 14.3552 20.6448 14.7446 20.8478 15.2346C21 15.6022 21 16.0681 21 17C21 17.9319 21 18.3978 20.8478 18.7654C20.6448 19.2554 20.2554 19.6448 19.7654 19.8478C19.3978 20 18.9319 20 18 20H6C5.06812 20 4.60218 20 4.23463 19.8478C3.74458 19.6448 3.35523 19.2554 3.15224 18.7654C3 18.3978 3 17.9319 3 17C3 16.0681 3 15.6022 3.15224 15.2346C3.35523 14.7446 3.74458 14.3552 4.23463 14.1522C4.60218 14 5.06812 14 6 14H6.6M12 15V4M12 15L9 12M12 15L15 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
+        {#if isLocalHost}
+            <button class="dice-button second" on:click={() => recording = !recording} title="record animation" data-umami-event="sketch-record" data-umami-event-sketch={sketches[selectedSketchIndex].name}>
+                <svg class="dice-svg" width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {#if recording}
+                        <path d="M3 3H21V21H3V3Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#FF0000"/>
+                    {:else}
+                        <path d="M3 3H21V21H3V3Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5 5H19V19H5V5Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    {/if}
+                </svg>
+            </button>
+        {/if}
     </div>
 
     <PaperCanvas bind:this={paperCanvas} key={key}
@@ -134,6 +152,7 @@
                  animate={selectedSketch.animation}
                  debug={debug}
                  ping={ping}
+                 record={recording}
                  />
 
     <div class="footer">
