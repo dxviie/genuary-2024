@@ -16,3 +16,7 @@ export function generateHarmonicColors(baseHue, numberOfColors, hueShift) {
     }
     return colors;
 }
+
+export function getPixelRatio() {
+    return (typeof window !== "undefined") ? window.devicePixelRatio : 1;
+}

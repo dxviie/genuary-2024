@@ -1,4 +1,4 @@
-import {generateHarmonicColors, getRandomInt} from "$lib/utils/ToolBox.js";
+import {generateHarmonicColors, getPixelRatio, getRandomInt} from "$lib/utils/ToolBox.js";
 
 export function clearChaos() {
     if (paused) {
@@ -280,10 +280,6 @@ function createPlayButton(paper) {
         paused = !paused;
     }
     return group;
-}
-
-function getPixelRatio() {
-    return (typeof window !== "undefined") ? window.devicePixelRatio : 1;
 }
 
 function generateNightSkyRaster(paper) {
