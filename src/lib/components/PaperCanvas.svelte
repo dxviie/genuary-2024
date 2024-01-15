@@ -74,8 +74,10 @@
             sketchName = sketchName.replaceAll(".", "");
         }
         let now = new Date();
+        let formattedFrameNumber = `${exportedFrames.toString().padStart(5, '0')}`;
+        exportedFrames++;
         let timestamp = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}-${now.getHours()}${now.getMinutes()}`;
-        return `d17e.dev-genuary2024-${sketchName}-${timestamp}//${exportedFrames++}.png`;
+        return `d17e.dev-genuary2024-${sketchName}-${timestamp}//${formattedFrameNumber}.png`;
     }
 
     onMount(() => {
@@ -142,7 +144,7 @@
 </script>
 
 <div class="canvas-container" id={key}>
-    <canvas bind:this={canvas}></canvas>
+    <canvas bind:this={canvas} data-paper-hidpi="off"></canvas>
 </div>
 
 <style>
