@@ -96,7 +96,7 @@ export function drawAscii(paper, event, debug) {
 
     if (loaded && currentBrandedEmoji) {
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 25; i++) {
             const resolution = RESOLUTION / getPixelRatio();
             const charSize = (paper.view.bounds.width*0.9)/resolution;
             handleChar(getRandomInt(0, resolution - 1), getRandomInt(0, resolution - 1), charSize, ascii.chars, currentBrandedEmoji, paper);
