@@ -1,7 +1,3 @@
-export function clearVera() {
+export function clearVera() {}
 
-}
-
-export function drawVera() {
-
-}
+export function drawVera() {}

@@ -1,7 +1,3 @@
-export function clear() {
+export function clear() {}
 
-}
-
-export function draw() {
-
-}
+export function draw() {}
