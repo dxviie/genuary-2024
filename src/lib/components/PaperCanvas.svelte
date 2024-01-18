@@ -122,7 +122,9 @@
 						sketch(paper, myEvent, debug);
 						downloadFrame();
 					}
-					sketch(paper, event, debug);
+					else {
+						sketch(paper, event, debug);
+					}
 				};
 			}
 		} else if (!animate) {
