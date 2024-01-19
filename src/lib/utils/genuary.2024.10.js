@@ -70,6 +70,7 @@ export function drawHex(paper, event, debug) {
 
     for (let i = hexesColored; i < Math.min(hexesColored + count, grid.children.length); i++) {
         let hexagon = grid.children[i];
+        hexagon.opacity = 1;
         if (world.contains(hexagon.position)) {
             hexagon.fillColor = new paper.Color("orangered");
             hexagon.isMainLand = true;
@@ -119,6 +120,7 @@ function createHexagonGrid(paper, resolution) {
             hexagon.fillColor = 'white';
             hexagon.strokeColor = 'black';
             hexagon.strokeWidth = 1;
+            hexagon.opacity = 0;
             hexagon.gridX = i;
             hexagon.gridY = j;
             hexagonGrid.addChild(hexagon);
