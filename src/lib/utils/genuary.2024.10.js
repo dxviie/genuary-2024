@@ -86,7 +86,7 @@ export function drawHex(paper, event, debug) {
             if (hexagon.isMainLand) {
                 return;
             }
-            let wobble1 = wobble(hexagon.gridX, hexagon.gridY, event.time);
+            let wobble1 = wobble(hexagon.gridX, hexagon.gridY, event.time * getPixelRatio());
             let normalized = (wobble1 - (-3.5)) / (3.5 - (-3.5));
             let min_scale = 0.95;
             let max_scale = 1.05;
