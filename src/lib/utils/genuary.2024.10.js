@@ -1,4 +1,4 @@
-import {getPixelRatio} from "$lib/utils/ToolBox.js";
+import {generateHarmonicColors, getPixelRatio, getRandomInt} from "$lib/utils/ToolBox.js";
 
 export function clearHex() {
     if (world) {
@@ -9,13 +9,23 @@ export function clearHex() {
         grid.remove();
         grid = null;
     }
+    hexesPerFrame = 1;
+    frameCount = 0;
+    count = 2;
 }
 
-let count = 100;
+const FRAMES_PER_COUNT = 125;
+const MAX_COUNT = 64;
+const COUNT_MULTIPLIER = 2;
+let hexesPerFrame = 1;
+let frameCount = 0;
+let count = 2;
 let world = null;
 let grid = null;
 let ready = false;
 let hexesColored = 0;
+let waterColors = [];
+let landColors = [];
 
 // hooray for wikipedia
 // https://commons.wikimedia.org/wiki/Category:SVG_maps_of_the_world
@@ -26,7 +36,24 @@ export function drawHex(paper, event, debug) {
         return;
     }
 
+    if (count < MAX_COUNT && frameCount++ >= FRAMES_PER_COUNT) {
+        count *= COUNT_MULTIPLIER;
+        hexesPerFrame *= (COUNT_MULTIPLIER + 1);
+        count = Math.min(count, MAX_COUNT);
+        if (world) {
+            world.remove();
+            world = null;
+        }
+        if (grid) {
+            grid.remove();
+            grid = null;
+        }
+        frameCount = 0;
+    }
+
     if (!grid) {
+        landColors = generateHarmonicColors(getRandomInt(320, 420),  10, 10, getRandomInt(50, 100), getRandomInt(100, 130));
+        waterColors = generateHarmonicColors(getRandomInt(180, 200), 10, 10, getRandomInt(50, 100), getRandomInt(75, 125));
         grid = createHexagonGrid(paper, count/getPixelRatio());
     }
 
@@ -47,6 +74,7 @@ export function drawHex(paper, event, debug) {
                             fillColor: 'black',
                             strokeColor: 'black',
                             strokeWidth: 1,
+                            opacity: 0
                         });
                         world.addChild(worldPiece);
                     }
@@ -68,18 +96,18 @@ export function drawHex(paper, event, debug) {
         return;
     }
 
-    for (let i = hexesColored; i < Math.min(hexesColored + count, grid.children.length); i++) {
+    for (let i = hexesColored; i < Math.min(hexesColored + hexesPerFrame, grid.children.length); i++) {
         let hexagon = grid.children[i];
         hexagon.opacity = 1;
         if (world.contains(hexagon.position)) {
-            hexagon.fillColor = new paper.Color("orangered");
+            hexagon.fillColor = landColors[Math.floor(Math.random() * landColors.length)];
             hexagon.isMainLand = true;
         }
         else {
-            hexagon.fillColor = new paper.Color("aquamarine");
+            hexagon.fillColor = waterColors[Math.floor(Math.random() * waterColors.length)];
         }
     }
-    hexesColored += count;
+    hexesColored += hexesPerFrame;
 
     if (hexesColored >= grid.children.length) {
         world.opacity = 0;
@@ -87,12 +115,9 @@ export function drawHex(paper, event, debug) {
             if (hexagon.isMainLand) {
                 return;
             }
-            let wobble1 = wobble(hexagon.gridX, hexagon.gridY, event.time * getPixelRatio());
+            let wobble1 = wobble(hexagon.gridX, hexagon.gridY, event.time * getPixelRatio() * 2);
             let normalized = (wobble1 - (-3.5)) / (3.5 - (-3.5));
-            let min_scale = 0.95;
-            let max_scale = 1.05;
-            let actualWobble = (normalized * (max_scale - min_scale) + min_scale);
-            hexagon.scale(actualWobble);
+            hexagon.translate(new paper.Point(0, normalized - 0.5));
         });
     }
 }
