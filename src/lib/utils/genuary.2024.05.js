@@ -22,7 +22,7 @@ export function drawVera(paper, event, debug) {
                 let point = new paper.Point(x, y);
                 let color = vera.getAverageColor(point);
                 let rectangle = new paper.Path.Rectangle(point, new paper.Size(width, height));
-                rectangle.fillColor = color.gray;
+                rectangle.fillColor = color.gray || color;
             }
         }
     }
