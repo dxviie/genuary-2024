@@ -1,8 +1,24 @@
-export function clearVera() {}
+import {getPixelRatio, getRandomInt} from "$lib/utils/ToolBox.js";
 
-let resolution = 27; //78;
-let iterations = 1;
-let tolerance = 0.5;
+const MIN_RESOLUTION = 3;
+const MAX_RESOLUTION = 81 / getPixelRatio();
+const MAX_ITERATIONS = 10;
+const MIN_LINE_COUNT = 5;
+const MAX_LINE_COUNT = 27;
+
+export function clearVera() {
+    resolution = getRandomInt(MIN_RESOLUTION, MAX_RESOLUTION);
+    iterations = getRandomInt(1, MAX_ITERATIONS);
+    tolerance = Math.random();
+    blockLineCount = getRandomInt(MIN_LINE_COUNT, MAX_LINE_COUNT);
+}
+
+let resolution = 81;
+let iterations = 6;
+let debugColors = ["yellow", "orange", "orangered", "red", "darkred"];
+let tolerance = 0.8;
+let blockLineCount = 9;
+let fontSize = 30;
 export function drawVera(paper, event, debug) {
     if (!paper || !paper.project || !paper.project.activeLayer) {
         return;
@@ -14,6 +30,14 @@ export function drawVera(paper, event, debug) {
     const width = bounds.width / resolution;
     const height = bounds.height / resolution;
     const size = new paper.Size(width, height);
+
+    let info = new paper.PointText({
+        point: [20 / getPixelRatio(), paper.view.center.y - (fontSize/getPixelRatio()*3)],
+        content: `initial resolution: ${resolution}x${resolution}\ngrouping iterations: ${iterations}\nsimilarity tolerance: ${tolerance}\nmax. lines per area: ${blockLineCount}\n\nDepending on the numbers above,\nand your device,\nthis might take a while.`,
+        fillColor: 'black',
+        fontSize: fontSize / getPixelRatio(),
+        fontFamily: 'courier new'
+    });
 
     let blocks = [];
 
@@ -39,75 +63,123 @@ export function drawVera(paper, event, debug) {
         }
     }
 
+
+
     // image found & edited from https://www.holo.mg/encounters/vera-molnar/
     let vera = new paper.Raster("/vera.png");
     vera.opacity = 0;
     vera.onLoad = () => {
+        info.remove();
         vera.fitBounds(bounds);
-        vera.opacity = 0.1;
-        vera.blendMode = "multiply";
 
         // group blocks in iterations
-        let toRemove = [];
-        let toAdd = [];
-        for (let i = 0; i < blocks.length; i++) {
-            let block = blocks[i];
-            if (block.used) { continue; }
-            let blockColor = vera.getAverageColor(block.bounds);
-            let neighbors = findValidNeighbors(blocks, block);
-            let neighborDiffs = neighbors.map(n => {
-                let neighborColor = vera.getAverageColor(n.bounds);
-                return Math.abs(blockColor.gray - neighborColor.gray);
-            });
-            // find the index in neighborDiffs of the smallest element
-            let minIndex = neighborDiffs.indexOf(Math.min(...neighborDiffs));
-            if (minIndex >= 0) {
-                let neighbor = neighbors[minIndex];
-                let neighborColor = vera.getAverageColor(neighbor.bounds);
-                if (blockColor && neighborColor && Math.abs(blockColor.gray - neighborColor.gray) < tolerance) {
-                    toRemove.push(block);
-                    toRemove.push(neighbor);
-                    block.used = true;
-                    neighbor.used = true;
-                    let newRect = block.unite(neighbor);
-                    newRect.fillColor = "yellow";
-                    toAdd.push(newRect);
-                    // break;
-                    console.log(blocks.map(b => b.used));
+        for (let i = 0; i < iterations; i++) {
+            let toRemove = [];
+            let toAdd = [];
+            for (let b = 0; b < blocks.length; b++) {
+                let block = blocks[b];
+                if (block.used) {
+                    continue;
+                }
+                let blockColor = vera.getAverageColor(block.bounds);
+                let neighbors = findValidNeighbors(blocks, block);
+                let neighborDiffs = neighbors.map(n => {
+                    let neighborColor = vera.getAverageColor(n.bounds);
+                    return Math.abs(blockColor.gray - neighborColor.gray);
+                });
+                // find the index in neighborDiffs of the smallest element
+                let minIndex = neighborDiffs.indexOf(Math.min(...neighborDiffs));
+                if (minIndex >= 0) {
+                    let neighbor = neighbors[minIndex];
+                    let neighborColor = vera.getAverageColor(neighbor.bounds);
+                    if (blockColor && neighborColor && Math.abs(blockColor.gray - neighborColor.gray) < tolerance) {
+                        toRemove.push(block);
+                        toRemove.push(neighbor);
+                        block.used = true;
+                        neighbor.used = true;
+                        let newBlock = block.unite(neighbor);
+                        if (debug) {
+                            let color = new paper.Color(debugColors[i % debugColors.length]);
+                            color.alpha = 0.5;
+                            newBlock.fillColor = color;
+                        }
+                        newBlock.gridX = Math.min(block.gridX, neighbor.gridX);
+                        newBlock.gridY = Math.min(block.gridY, neighbor.gridY);
+                        newBlock.xSpan = block.gridY === neighbor.gridY ? block.xSpan + neighbor.xSpan : block.xSpan;
+                        newBlock.ySpan = block.gridX === neighbor.gridX ? block.ySpan + neighbor.ySpan : block.ySpan;
+                        newBlock.used = false;
+                        toAdd.push(newBlock);
+                    }
                 }
             }
-        }
 
-        for (let r = 0; r < toRemove.length; r++) {
-            let index = blocks.indexOf(toRemove[r]);
-            if (index >= 0) {
-                blocks.splice(index, 1);
+            for (let r = 0; r < toRemove.length; r++) {
+                let index = blocks.indexOf(toRemove[r]);
+                if (index >= 0) {
+                    blocks.splice(index, 1);
+                }
+                toRemove[r].remove();
             }
-            toRemove[r].remove();
-        }
-        for (let a = 0; a < toAdd.length; a++) {
-            blocks.push(toAdd[a]);
+            for (let a = 0; a < toAdd.length; a++) {
+                blocks.push(toAdd[a]);
+            }
         }
 
         // hatch fill remaining blocks
         for (let i = 0; i < blocks.length; i++) {
-            let rectangle = blocks[i];
-            let start = new paper.Point(rectangle.bounds.x, rectangle.bounds.y);
-            let end = new paper.Point(rectangle.bounds.x + rectangle.bounds.width, rectangle.bounds.y + rectangle.bounds.height);
-            hatchFillRectangle(paper, debug, start, end,  rectangle,5);
+            let block = blocks[i];
+            // get the average color for each quadrant of the block
+            let halfwit = block.bounds.width / 2;
+            let halfhit = block.bounds.height / 2;
+            let topLeft = vera.getAverageColor(new paper.Rectangle(block.bounds.x, block.bounds.y, halfwit, halfhit));
+            let topRight = vera.getAverageColor(new paper.Rectangle(block.bounds.x + halfwit, block.bounds.y, halfwit, halfhit));
+            let bottomLeft = vera.getAverageColor(new paper.Rectangle(block.bounds.x, block.bounds.y + halfhit, halfwit, halfhit));
+            let bottomRight = vera.getAverageColor(new paper.Rectangle(block.bounds.x + halfwit, block.bounds.y + halfhit, halfwit, halfhit));
+            if (!topLeft || !topRight || !bottomLeft || !bottomRight) {
+                continue;
+            }
+            let diffDesc = Math.abs(topLeft.gray - bottomRight.gray);
+            let diffAsc = Math.abs(topRight.gray - bottomLeft.gray);
+            let start, end;
+            let pattern = 2;
+            if (diffAsc < diffDesc) {
+                // descending
+                if (diffDesc > tolerance/2) {
+                    pattern = topLeft.gray > bottomRight.gray ? 0 : 1;
+                }
+                start = new paper.Point(block.bounds.x, block.bounds.y);
+                end = new paper.Point(block.bounds.x + block.bounds.width, block.bounds.y + block.bounds.height);
+            }
+            else {
+                // ascending
+                if (diffAsc > tolerance/2) {
+                    pattern = topRight.gray > bottomLeft.gray ? 0 : 1;
+                }
+                start = new paper.Point(block.bounds.x, block.bounds.y + block.bounds.height);
+                end = new paper.Point(block.bounds.x + block.bounds.width, block.bounds.y);
+            }
+            let averageColor = vera.getAverageColor(block.bounds);
+            // map average color to linecount
+            let lineCount = Math.floor((1- averageColor.gray) * blockLineCount);
+            hatchFillRectangle(paper, debug, start, end,  block, lineCount, pattern);
         }
     }
 }
 
-function hatchFillRectangle(paper, debug, start, end, rectangle, lineCount) {
+function hatchFillRectangle(paper, debug, start, end, rectangle, lineCount, pattern) {
     let direction = new paper.Path.Line(start, end);
+    if (pattern === 0) {
+        direction = new paper.Path.Line(start, direction.getPointAt(direction.length / 2));
+    }
+    else if (pattern === 1) {
+        direction = new paper.Path.Line(direction.getPointAt(direction.length / 2), end);
+    }
     if (debug) {
         direction.strokeColor = "red";
     }
     for (var i = 0; i < lineCount; i++) {
         let linePoint = direction.getPointAt(i * direction.length / (lineCount-1));
         if (!linePoint) {
-            console.error("linePoint is null", i, lineCount, direction.length, direction);
             continue;
         }
         if (debug) {
@@ -139,8 +211,8 @@ function findValidNeighbors(blocks, block) {
     for (let i = 0; i < blocks.length; i++) {
         let neighbor = blocks[i];
         if (neighbor.gridX === x && neighbor.gridY === y) { continue; }
-        if ((neighbor.gridX === x && neighbor.gridY >= y && neighbor.gridY <= y + ySpan && neighbor.ySpan === ySpan)
-        || (neighbor.gridY === y && neighbor.gridX >= x && neighbor.gridX <= x + xSpan && neighbor.xSpan === xSpan)) {
+        if ((neighbor.gridX === x && neighbor.gridY >= y && neighbor.gridY <= y + ySpan && neighbor.xSpan === xSpan)
+        || (neighbor.gridY === y && neighbor.gridX >= x && neighbor.gridX <= x + xSpan && neighbor.ySpan === ySpan)) {
             if (!neighbor.used) {
                 neighbors.push(neighbor);
             }
