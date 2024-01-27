@@ -1,7 +1,7 @@
 import {generateHarmonicColors, getPixelRatio, getRandomInt} from "$lib/utils/ToolBox.js";
 
 let flock = [];
-const BOIDS = 100/ getPixelRatio();
+const BOIDS = 100;
 const TRAIL_LENGTH = 100 / getPixelRatio();
 let border = 50;
 const MAX_STROKE_WIDTH = 50 / getPixelRatio();
