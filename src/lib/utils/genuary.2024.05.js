@@ -69,6 +69,10 @@ export function drawVera(paper, event, debug) {
     let vera = new paper.Raster("/vera.png");
     vera.opacity = 0;
     vera.onLoad = () => {
+        if (debug) {
+            vera.opacity = 0.1;
+            vera.blendMode = 'multiply';
+        }
         info.remove();
         vera.fitBounds(bounds);
 
@@ -162,6 +166,11 @@ export function drawVera(paper, event, debug) {
             // map average color to linecount
             let lineCount = Math.floor((1- averageColor.gray) * blockLineCount);
             hatchFillRectangle(paper, debug, start, end,  block, lineCount, pattern);
+        }
+
+        if (!debug) {
+            vera.remove();
+            blocks.forEach(b => b.remove());
         }
     }
 }
