@@ -2,16 +2,30 @@ import {generateHarmonicColors, getPixelRatio, getRandomInt} from "$lib/utils/To
 
 let flock = [];
 const BOIDS = 100;
-const TRAIL_LENGTH = 100 / getPixelRatio();
+const TRAIL_LENGTH = 500 / getPixelRatio();
 let border = 50;
 const MAX_STROKE_WIDTH = 50 / getPixelRatio();
 let trailColors;
+let chars = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+                "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+                "U", "V", "X", "Y", "Z"];
+let text = null;
+let letter = null;
+let textData = null;
 export function clearFlock() {
     flock.forEach((boid) => {
         boid.trail.remove();
         boid.path.remove();
     } );
     flock = [];
+    if (text) {
+        text.remove();
+        text = null;
+    }
+    if (letter) {
+        letter.remove();
+        letter = null;
+    }
 }
 
 export function drawFlock(paper, event, debug) {
@@ -19,10 +33,38 @@ export function drawFlock(paper, event, debug) {
         return;
     }
 
+    if (!text) {
+        // draw a big letter A filling the view in Arial Black
+        letter = new paper.PointText({
+            point: [0, 0],
+            content: chars[getRandomInt(0, chars.length - 1)],
+            fillColor: "red",
+            fontFamily: 'Arial Black',
+            fontWeight: 'bold',
+            fontSize: paper.view.bounds.width,
+            strokeColor: debug ? 'red' : null,
+            strokeWidth: 1,
+            opacity: 1
+        });
+        letter.fitBounds(paper.view.bounds);
+
+        text = letter.rasterize();
+        letter.remove();
+        textData = text.getImageData();
+        text.sendToBack();
+        if (debug) {
+            text.opacity = 0.1;
+        }
+        else {
+            text.opacity = 0;
+        }
+
+    }
+
     if (flock.length < 1) {
         trailColors = generateHarmonicColors(getRandomInt(0, 360), 5, getRandomInt(15,50),getRandomInt(10, 100), getRandomInt(30, 150));
         border = getRandomInt(1, paper.view.bounds.width / 4);
-        flock = createFlock(paper, getRandomInt(BOIDS/4, BOIDS));
+        flock = createFlock(paper, getRandomInt(BOIDS/4, BOIDS), debug);
     }
 
     flock.forEach((boid) => {
@@ -31,25 +73,39 @@ export function drawFlock(paper, event, debug) {
     });
 }
 
-function createFlock(paper, count) {
+function createFlock(paper, count, debug) {
     let flock = [];
     let center = paper.view.center;
     let bounds = paper.view.bounds;
     let size = bounds.width * 0.8;
     for (let i = 0; i < count; i++) {
-        let position = new paper.Point(
-            center.x + getRandomInt(-size / 2, size / 2),
-            center.y + getRandomInt(-size / 2, size / 2)
-        );
-        let boid = new Boid(position, paper);
+        let position;
+        while (!position || !isInsideLetter(paper, position)) {
+            position = new paper.Point(
+                center.x + getRandomInt(-size / 2, size / 2),
+                center.y + getRandomInt(-size / 2, size / 2)
+            );
+        }
+        let boid = new Boid(position, paper, debug);
         flock.push(boid);
     }
     return flock;
 }
 
+function isInsideLetter(paper, point) {
+    let borderX = (paper.view.bounds.width - textData.width)/2;
+    // get text color at boid position
+    let posX = Math.floor(point.x - borderX);
+    let posY = Math.floor(point.y);
+    let index = (Math.floor(posY) * textData.width + Math.floor(posX)) * 4;
+    let pixel = textData.data[index];
+    return pixel >= 200 && posX >= 0 && posX < textData.width && posY >= 0 && posY < textData.height;
+}
+
 class Boid {
-    constructor(position, paper) {
-        let color = trailColors[getRandomInt(0, trailColors.length)];
+    constructor(position, paper, debug) {
+        let color = new paper.Color(trailColors[getRandomInt(0, trailColors.length - 1)]);
+        this.debug = debug;
         this.position = position;
         this.velocity = new paper.Point(0, 0);
         this.acceleration = new paper.Point(0, 0);
@@ -57,6 +113,7 @@ class Boid {
         this.maxSpeed = 5;
         this.r = 4.0;
         this.paper = paper;
+        this.chosenColor = color;
         this.path = new paper.Path.Circle({
             center: this.position,
             radius: this.r,
@@ -70,7 +127,7 @@ class Boid {
             strokeCap: "round",
             strokeJoin: "round",
             opacity: 0.5,
-            blendMode: "screen"
+            blendMode: "hard-light",
         });
         this.trailLength = getRandomInt(10, TRAIL_LENGTH);
     }
@@ -97,21 +154,68 @@ class Boid {
         let sep = this.separate(boids);
         let ali = this.align(boids);
         let coh = this.cohesion(boids);
-        // steer away from view edges
-        let bounds = this.paper.view.bounds;
+
         let desired = null;
-        if (this.position.x < bounds.x + this.r + border) {
-            desired = new this.paper.Point(this.maxSpeed, this.velocity.y);
+        if (isInsideLetter(this.paper, this.position)) {
+               this.path.fillColor = this.chosenColor;
+               this.trail.strokeColor = this.chosenColor;
         }
-        else if (this.position.x > bounds.x + bounds.width - this.r - border) {
-            desired = new this.paper.Point(-this.maxSpeed, this.velocity.y);
+        else {
+            if (this.debug) {
+                this.path.fillColor = "red";
+                this.trail.strokeColor = "red";
+            }
+
+            // steer away from view edges
+            let bounds = this.paper.view.bounds;
+            if (this.position.x < bounds.x + this.r + border) {
+                desired = new this.paper.Point(this.maxSpeed, this.velocity.y);
+            }
+            else if (this.position.x > bounds.x + bounds.width - this.r - border) {
+                desired = new this.paper.Point(-this.maxSpeed, this.velocity.y);
+            }
+            if (this.position.y < bounds.y + this.r + border) {
+                desired = new this.paper.Point(this.velocity.x, this.maxSpeed);
+            }
+            else if (this.position.y > bounds.y + bounds.height - this.r - border) {
+                desired = new this.paper.Point(this.velocity.x, -this.maxSpeed);
+            }
+
+            // if we're not outside the border, check if we're inside the letter
+
+            if (!desired) {
+                // check four pixels around boid position
+                const space = 50;// / getPixelRatio();
+                let upPoint = new this.paper.Point(this.position.x, this.position.y - space);
+                let upRightPoint = new this.paper.Point(this.position.x + space, this.position.y - space);
+                let rightPoint = new this.paper.Point(this.position.x + space, this.position.y);
+                let downRightPoint = new this.paper.Point(this.position.x + space, this.position.y + space);
+                let downPoint = new this.paper.Point(this.position.x, this.position.y + space);
+                let downLeftPoint = new this.paper.Point(this.position.x - space, this.position.y + space);
+                let leftPoint = new this.paper.Point(this.position.x - space, this.position.y);
+                let upLeftPoint = new this.paper.Point(this.position.x - space, this.position.y - space);
+
+                if (isInsideLetter(this.paper, upPoint)) {
+                    desired = new this.paper.Point(this.velocity.x, -this.maxSpeed);
+                } else if (isInsideLetter(this.paper, upRightPoint)) {
+                    desired = new this.paper.Point(this.maxSpeed, -this.maxSpeed);
+                } else if (isInsideLetter(this.paper, rightPoint)) {
+                    desired = new this.paper.Point(this.maxSpeed, this.velocity.y);
+                } else if (isInsideLetter(this.paper, downRightPoint)) {
+                    desired = new this.paper.Point(this.maxSpeed, this.maxSpeed);
+                } else if (isInsideLetter(this.paper, downPoint)) {
+                    desired = new this.paper.Point(this.velocity.x, this.maxSpeed);
+                } else if (isInsideLetter(this.paper, downLeftPoint)) {
+                    desired = new this.paper.Point(-this.maxSpeed, this.maxSpeed);
+                } else if (isInsideLetter(this.paper, leftPoint)) {
+                    desired = new this.paper.Point(-this.maxSpeed, this.velocity.y);
+                } else if (isInsideLetter(this.paper, upLeftPoint)) {
+                    desired = new this.paper.Point(-this.maxSpeed, -this.maxSpeed);
+                }
+            }
         }
-        if (this.position.y < bounds.y + this.r + border) {
-            desired = new this.paper.Point(this.velocity.x, this.maxSpeed);
-        }
-        else if (this.position.y > bounds.y + bounds.height - this.r - border) {
-            desired = new this.paper.Point(this.velocity.x, -this.maxSpeed);
-        }
+
+
         if (desired) {
             let steer = desired.subtract(this.velocity);
             if (steer.length > this.maxForce) {
@@ -119,26 +223,8 @@ class Boid {
             }
             sep = sep.add(steer);
         }
-        // if the mouse is pressed, steer towards it
-        if (this.paper.Key.isDown("space")) {
-            let mouse = this.paper.view.center;
-            let steer = this.seek(mouse);
-            sep = sep.add(steer);
-        }
-        // if the mouse is hovering over the view, steer towards it
-        if (this.paper.view.bounds.contains(this.paper.view.getEventPoint("mousemove"))) {
-            let mouse = this.paper.view.getEventPoint("mousemove");
-            let steer = this.seek(mouse);
-            sep = sep.add(steer);
-        }
-        // when the mouse is clicked move towards is
-        if (this.paper.Key.isDown("space")) {
-            let mouse = this.paper.view.center;
-            let steer = this.seek(mouse);
-            sep = sep.add(steer);
-        }
 
-        sep = sep.multiply(1.5);
+        sep = sep.multiply(2.0);
         ali = ali.multiply(1.0);
         coh = coh.multiply(1.0);
 
