@@ -12,6 +12,7 @@
 	import { clearChaos, drawChaos } from '$lib/utils/genuary.2024.08.js';
 	import { clearAscii, drawAscii } from '$lib/utils/genuary.2024.09.js';
 	import {clearHex, drawHex} from "$lib/utils/genuary.2024.10.js";
+	import {clearFlock, drawFlock} from "$lib/utils/genuary.2024.19.js";
 
     let key = 0;
     let ping = 0;
@@ -28,6 +29,7 @@
         {name: "08. Chaotic system", sketch: drawChaos, reset: clearChaos, animation: true, md: "/md/08.md"},
         {name: "09. ASCII", sketch: drawAscii, reset: clearAscii, animation: true, md: "/md/09.md"},
 		{name: "10. Hexagonal", sketch: drawHex, reset: clearHex, animation: true, md: "/md/10.md"},
+		{name: "19. Flocking", sketch: drawFlock, reset: clearFlock, animation: true, md: "/md/19.md"}
     ];
     let selectedSketchIndex = 0;
     let selectedSketch = sketches[selectedSketchIndex];
