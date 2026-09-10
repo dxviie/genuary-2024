@@ -133,7 +133,7 @@
 			data-umami-event="sketch-select"
 			data-umami-event-sketch={sketches[selectedSketchIndex].name}
 		>
-			{#each sketches as sketch, index}
+			{#each sketches as sketch, index (index)}
 				<option value={index}>
 					{sketch.name}
 				</option>
